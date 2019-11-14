@@ -150,5 +150,15 @@ public class Robot2019
         imu = hwMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
     }
- }
+
+        public void setPower(double power){
+            leftDrive.setPower(power);
+            rightDrive.setPower(power);
+            leftFrontDrive.setPower(power);
+            rightFrontDrive.setPower(power);
+        }
+
+
+}
+
 
