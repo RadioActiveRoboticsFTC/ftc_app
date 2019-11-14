@@ -181,10 +181,9 @@ public class TestAutoDriveByEncoder extends LinearOpMode {
             }
 
             // Stop all motion;
-            robot.leftDrive.setPower(0);
-            robot.rightDrive.setPower(0);
-            robot.leftFrontDrive.setPower(0);
-            robot.rightFrontDrive.setPower(0);
+
+
+            robot.setPower(0);
 
             // Turn off RUN_TO_POSITION
             robot.leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -195,4 +194,13 @@ public class TestAutoDriveByEncoder extends LinearOpMode {
             //  sleep(250);   // optional pause after each move
         }
     }
+            public void gyroTurn(double speed, double turnDegrees){
+
+                //angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+
+
+        }
+
+
+
 }
