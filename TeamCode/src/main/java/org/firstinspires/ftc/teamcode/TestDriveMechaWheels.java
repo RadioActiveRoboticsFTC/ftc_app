@@ -53,7 +53,7 @@ import java.util.List;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="MechaWheels", group="Linear Opmode")
+@TeleOp(name="Do Not Run This", group="Linear Opmode")
 public class TestDriveMechaWheels extends LinearOpMode {
 
     // Declare OpMode members.
@@ -75,30 +75,6 @@ public class TestDriveMechaWheels extends LinearOpMode {
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
 
-        List<DigitalChannel> all = hardwareMap.getAll(DigitalChannel.class);
-        telemetry.addData("num digital channels:", all.size());
-
-        List<DcMotor> allMs = hardwareMap.getAll(DcMotor.class);
-        telemetry.addData("num dc motors:", allMs.size());
-
-        List<Servo> allServos = hardwareMap.getAll(Servo.class);
-        telemetry.addData("num servos:", allServos.size());
-
-        telemetry.update();
-
-        DigitalChannel a;
-        for (int i=0; i < all.size(); i++) {
-            a = all.get(i);
-
-        }
-
-        Servo b;
-        for (int i=0; i < allServos.size(); i++) {
-            b = allServos.get(i);
-
-        }
-
-        //servo = hardwareMap.get(Servo.class, "servo");
 
 
         // Initialize the hardware variables. Note that the strings used here as parameters
@@ -183,6 +159,7 @@ public class TestDriveMechaWheels extends LinearOpMode {
             // Send calculated power to wheels
 
             if (strafeDirection == 0.0) {
+                // this is traditional tank motion
                 leftDrive.setPower(leftPower);
                 rightDrive.setPower(rightPower);
                 leftDriveFront.setPower(leftPower);
@@ -190,6 +167,7 @@ public class TestDriveMechaWheels extends LinearOpMode {
             } else {
                 //power is equal to the x value of the joystick so you are taing the - of a - or vice versa
                 double power = strafeDirection;
+                // TODO: this if statement is not necessary!
                 if (strafeDirection > 0.0) {
                     // strafe right
                     leftDrive.setPower(-power);
