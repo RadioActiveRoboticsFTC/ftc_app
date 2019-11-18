@@ -55,57 +55,26 @@ import java.util.List;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="ServoMechaWheels", group="Linear Opmode")
+@TeleOp(name="Working Remote Control", group="Linear Opmode")
 public class TestDriveServoMechaWheels extends LinearOpMode {
 
-    Servo leftservo;
-    Servo rightservo;
 
-    // Declare OpMode members.
-    private Gyroscope imu;
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor leftDrive = null;
-    private DcMotor rightDrive = null;
-    private DcMotor leftDriveFront = null;
-    private DcMotor rightDriveFront = null;
 
-    private DigitalChannel digitalTouch;  // Hardware Device Object
-    private Servo servo = null;
+
     @Override
     public void runOpMode() {
+        Robot2019              robot   = new Robot2019();
         // Connect to servo (Assume PushBot Left Hand)
         // Change the text in quotes to match any servo name on your robot.
-        leftservo = hardwareMap.get(Servo.class, "LeftServo");
-        rightservo = hardwareMap.get(Servo.class, "RightServo");
-
+       //leftservo = hardwareMap.get(Servo.class, "LeftServo");
+        //rightservo = hardwareMap.get(Servo.class, "RightServo");
+        robot.init(hardwareMap);
         telemetry.addData("Status", "Initialized");
 
-        List<DigitalChannel> all = hardwareMap.getAll(DigitalChannel.class);
-        telemetry.addData("num digital channels:", all.size());
-
-        List<DcMotor> allMs = hardwareMap.getAll(DcMotor.class);
-        telemetry.addData("num dc motors:", allMs.size());
-
-        List<Servo> allServos = hardwareMap.getAll(Servo.class);
-        telemetry.addData("num servos:", allServos.size());
 
         telemetry.update();
-
-        DigitalChannel a;
-        for (int i=0; i < all.size(); i++) {
-            a = all.get(i);
-
-        }
-
-        Servo b;
-        for (int i=0; i < allServos.size(); i++) {
-            b = allServos.get(i);
-
-        }
-
-        //servo = hardwareMap.get(Servo.class, "servo");
-
-
+        /*
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
@@ -120,6 +89,7 @@ public class TestDriveServoMechaWheels extends LinearOpMode {
         rightDrive.setDirection(DcMotor.Direction.FORWARD);
         leftDriveFront.setDirection(DcMotor.Direction.REVERSE);
         rightDriveFront.setDirection(DcMotor.Direction.FORWARD);
+        */
 
         //imu = hardwareMap.get(Gyroscope.class, "imu");
 
@@ -186,6 +156,7 @@ public class TestDriveServoMechaWheels extends LinearOpMode {
 
             // claw arms can be open and closed.
             // left motor:
+            /*
             float closedPositionL = (float) .9;
             float openPositionL = (float) .4;
             float triggerDownL = (float) 1.0;
@@ -193,6 +164,7 @@ public class TestDriveServoMechaWheels extends LinearOpMode {
             float closedPositionR = (float) .3;
             float openPositionR = (float) .8;
             float triggerDownR = (float) 1.0;
+            */
 
             // TBF: what are the values for the trigger?
             // for now, assume down == 1.0, and up is 0.0
@@ -205,30 +177,30 @@ public class TestDriveServoMechaWheels extends LinearOpMode {
             // Send calculated power to wheels
 
             if (strafeDirection == 0.0) {
-                leftDrive.setPower(leftPower);
-                rightDrive.setPower(rightPower);
-                leftDriveFront.setPower(leftPower);
-                rightDriveFront.setPower(rightPower);
+                robot.leftDrive.setPower(leftPower);
+                robot.rightDrive.setPower(rightPower);
+                robot.leftFrontDrive.setPower(leftPower);
+                robot.rightFrontDrive.setPower(rightPower);
             } else {
                 //power is equal to the x value of the joystick so you are taing the - of a - or vice versa
                 double power = strafeDirection;
                 if (strafeDirection > 0.0) {
                     // strafe right
-                    leftDrive.setPower(-power);
-                    rightDrive.setPower(power);
+                    robot.leftDrive.setPower(-power);
+                    robot.rightDrive.setPower(power);
 
-                    leftDriveFront.setPower(power);
-                    rightDriveFront.setPower(-power);
+                    robot.leftFrontDrive.setPower(power);
+                    robot.rightFrontDrive.setPower(-power);
                     telemetry.addData("strafing right", "yes");
 
                 }
                 if (strafeDirection < 0.0)    {
                     // strafe left
-                    leftDrive.setPower(-power);
-                    rightDrive.setPower(power);
+                    robot.leftDrive.setPower(-power);
+                    robot.rightDrive.setPower(power);
 
-                    leftDriveFront.setPower(power);
-                    rightDriveFront.setPower(-power);
+                    robot.leftFrontDrive.setPower(power);
+                    robot.rightFrontDrive.setPower(-power);
                     telemetry.addData("strafing left", "yes");
 
                 }
@@ -240,29 +212,29 @@ public class TestDriveServoMechaWheels extends LinearOpMode {
 
             telemetry.addData("left trigger value", leftTriggerValue);
 
-            if (leftTriggerValue < triggerDownL) {
-                leftposition = closedPositionL;
+            if (leftTriggerValue < robot.triggerDownL) {
+                leftposition = robot.closedPositionL;
             }
-            if (leftTriggerValue == triggerDownL) {
-                leftposition = openPositionL;
+            if (leftTriggerValue == robot.triggerDownL) {
+                leftposition = robot.openPositionL;
             }
 
 
             // if right trigger pressed right servo goes to closed position
 
             float rightTriggerValue = gamepad1.right_trigger;
-            if (rightTriggerValue < triggerDownR){
-                rightposition = closedPositionR;}
+            if (rightTriggerValue < robot.triggerDownR){
+                rightposition = robot.closedPositionR;}
 
-            if (rightTriggerValue == triggerDownR){
-                rightposition = openPositionR;
+            if (rightTriggerValue == robot.triggerDownR){
+                rightposition = robot.openPositionR;
             }
             // Display the current value
             telemetry.addData(" Left Servo Position", "%5.2f", leftposition);
             telemetry.addData(">", "Press Stop to end test." );
 
-            leftservo.setPosition(leftposition);
-            rightservo.setPosition(rightposition);
+            robot.leftServo.setPosition(leftposition);
+            robot.rightServo.setPosition(rightposition);
             //sleep(CYCLE_MS);
             idle();
 
@@ -287,8 +259,8 @@ public class TestDriveServoMechaWheels extends LinearOpMode {
             rightDriveFront.setPower(power);
             */
 
-            leftDrive.getCurrentPosition();
-            rightDrive.getCurrentPosition();
+            //leftDrive.getCurrentPosition();
+            //rightDrive.getCurrentPosition();
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
