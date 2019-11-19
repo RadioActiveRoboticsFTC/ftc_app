@@ -170,6 +170,50 @@ public class Robot2019
             rightFrontDrive.setPower(power);
         }
 
+        public void setPower(double leftPower, double rightPower){
+            leftDrive.setPower(leftPower);
+            rightDrive.setPower(rightPower);
+            leftFrontDrive.setPower(leftPower);
+            rightFrontDrive.setPower(rightPower);
+        }
+
+        public void setDriveMode(DcMotor.RunMode mode) {
+            leftDrive.setMode(mode);
+            rightDrive.setMode(mode);
+
+            leftFrontDrive.setMode(mode);
+            rightFrontDrive.setMode(mode);
+        }
+
+        public void setTargetPosition(int newLeftTarget, int newRightTarget){
+            leftDrive.setTargetPosition(newLeftTarget);
+            rightDrive.setTargetPosition(newRightTarget);
+            leftFrontDrive.setTargetPosition(newLeftTarget);
+            rightFrontDrive.setTargetPosition(newRightTarget);
+        }
+
+        // to strafe, twin drives must be set to opposing powers.
+        // strafeing left or right depends on sign of power
+        public void setStrafePower(double power) {
+            leftDrive.setPower(-power);
+            rightDrive.setPower(power);
+
+            leftFrontDrive.setPower(power);
+            rightFrontDrive.setPower(-power);
+        }
+
+        public void runMotorTickDistance(int distance, double power, DcMotor motor) {
+            int newTarget = motor.getCurrentPosition();
+            motor.setTargetPosition(newTarget);
+            motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            motor.setPower(Math.abs(power));
+            while (motor.isBusy()) {
+                // let the motor run
+
+            }
+            motor.setPower(0);
+            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
 
 }
 
