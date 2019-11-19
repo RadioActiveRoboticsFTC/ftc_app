@@ -34,6 +34,12 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+
 /**
  * This file illustrates the concept of driving a path based on encoder counts.
  * It uses the common Pushbot hardware class to define the drive on the robot.
@@ -77,6 +83,10 @@ public class TestAutoDriveByEncoder extends LinearOpMode {
     static final double     DRIVE_SPEED             = 0.4; //0.6;
     static final double     TURN_SPEED              = 0.4; //0.5;
 
+    // State used for updating telemetry
+    Orientation angles;
+    //Acceleration gravity;
+
     @Override
     public void runOpMode() {
 
@@ -90,11 +100,16 @@ public class TestAutoDriveByEncoder extends LinearOpMode {
         telemetry.addData("Status", "Resetting Encoders");    //
         telemetry.update();
 
+        robot.setDriveMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        /*
         robot.leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot.rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         robot.leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         robot.rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        */
+
+        robot.setDriveMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Send telemetry message to indicate successful Encoder reset
         telemetry.addData("Path0",  "Starting at %7d :%7d",
@@ -137,6 +152,7 @@ public class TestAutoDriveByEncoder extends LinearOpMode {
                              double timeoutS) {
         int newLeftTarget;
         int newRightTarget;
+        double yAxis;
 
         // Ensure that the opmode is still active
         if (opModeIsActive()) {
@@ -144,23 +160,33 @@ public class TestAutoDriveByEncoder extends LinearOpMode {
             // Determine new target position, and pass to motor controller
             newLeftTarget = robot.leftDrive.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
             newRightTarget = robot.rightDrive.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+
+            /*
             robot.leftDrive.setTargetPosition(newLeftTarget);
             robot.rightDrive.setTargetPosition(newRightTarget);
             robot.leftFrontDrive.setTargetPosition(newLeftTarget);
             robot.rightFrontDrive.setTargetPosition(newRightTarget);
+            */
+            robot.setTargetPosition(newLeftTarget, newRightTarget);
 
             // Turn On RUN_TO_POSITION
+            /*
             robot.leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             robot.rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             robot.leftFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             robot.rightFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            */
+            robot.setDriveMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             // reset the timeout time and start motion.
             runtime.reset();
+            /*
             robot.leftDrive.setPower(Math.abs(speed));
             robot.rightDrive.setPower(Math.abs(speed));
             robot.leftFrontDrive.setPower(Math.abs(speed));
             robot.rightFrontDrive.setPower(Math.abs(speed));
+            */
+            robot.setPower(Math.abs(speed));
 
             // keep looping while we are still active, and there is time left, and both motors are running.
             // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
@@ -171,6 +197,9 @@ public class TestAutoDriveByEncoder extends LinearOpMode {
             while (opModeIsActive() &&
                    (runtime.seconds() < timeoutS) &&
                    (robot.leftDrive.isBusy() && robot.rightDrive.isBusy())) {
+
+                angles = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+                yAxis = AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle);
 
                 // Display it for the driver.
                 telemetry.addData("Path1",  "Running to %7d :%7d", newLeftTarget,  newRightTarget);
@@ -186,10 +215,13 @@ public class TestAutoDriveByEncoder extends LinearOpMode {
             robot.setPower(0);
 
             // Turn off RUN_TO_POSITION
+            /*
             robot.leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             robot.rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             robot.leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             robot.rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            */
+            robot.setDriveMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
             //  sleep(250);   // optional pause after each move
         }
