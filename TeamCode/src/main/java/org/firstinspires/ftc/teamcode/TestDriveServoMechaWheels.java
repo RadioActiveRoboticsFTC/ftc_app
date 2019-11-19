@@ -74,30 +74,8 @@ public class TestDriveServoMechaWheels extends LinearOpMode {
 
 
         telemetry.update();
-        /*
-        // Initialize the hardware variables. Note that the strings used here as parameters
-        // to 'get' must correspond to the names assigned during the robot configuration
-        // step (using the FTC Robot Controller app on the phone).
-        leftDrive  = hardwareMap.get(DcMotor.class, "BackLeft");
-        rightDrive = hardwareMap.get(DcMotor.class, "BackRight");
-        leftDriveFront  = hardwareMap.get(DcMotor.class, "FrontLeft");
-        rightDriveFront = hardwareMap.get(DcMotor.class, "FrontRight");
 
-        // Most robots need the motor on one side to be reversed to drive forward
-        // Reverse the motor that runs backwards when connected directly to the battery
-        leftDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightDrive.setDirection(DcMotor.Direction.FORWARD);
-        leftDriveFront.setDirection(DcMotor.Direction.REVERSE);
-        rightDriveFront.setDirection(DcMotor.Direction.FORWARD);
-        */
 
-        //imu = hardwareMap.get(Gyroscope.class, "imu");
-
-        // get a reference to our digitalTouch object.
-        //digitalTouch = hardwareMap.get(DigitalChannel.class, "testTouch");
-
-        // set the digital channel to input.
-        //digitalTouch.setMode(DigitalChannel.Mode.INPUT);
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
@@ -114,15 +92,6 @@ public class TestDriveServoMechaWheels extends LinearOpMode {
             //telemetry.addData("Ang Velocity:", " %f", angularVelocity.xRotationRate);
 
 
-            // send the info back to driver station using telemetry function.
-            // if the digital channel returns true it's HIGH and the button is unpressed.
-            /*
-            if (digitalTouch.getState() == true) {
-                telemetry.addData("Digital Touch", "Is Not Pressed");
-            } else {
-                telemetry.addData("Digital Touch", "Is Pressed");
-            }
-            */
 
             // Setup a variable for each drive wheel to save power level for telemetry
             double leftPower;
@@ -130,16 +99,33 @@ public class TestDriveServoMechaWheels extends LinearOpMode {
 
 
             boolean xPressed = gamepad1.x;
-            boolean yPressed = gamepad1.y;
+            //boolean yPressed = gamepad1.y;
 
-            /*
+            // test each motor
             if (xPressed) {
-                servo.setPosition(0.25);
+                telemetry.addData("calling", "runMotorTickDistance");
+                DcMotor motor = null;
+                int distance = 1440;
+                double p = 0.5;
+                /*
+                if (gamepad1.a) robot.runMotorTickDistance(distance, power, robot.leftDrive);
+                if (gamepad1.b) robot.runMotorTickDistance(distance, power, robot.leftFrontDrive);
+                if (gamepad1.y) robot.runMotorTickDistance(distance, power, robot.rightDrive);
+                */
+                motor = robot.rightFrontDrive;
+                if (gamepad1.a) motor = robot.leftDrive;
+                if (gamepad1.b) motor = robot.leftFrontDrive;
+                if (gamepad1.y) motor = robot.rightDrive;
+                telemetry.addData("Motor", motor.getDeviceName());
+                telemetry.addData("Motor start position", motor.getCurrentPosition());
+
+                robot.runMotorTickDistance(distance, p, motor);
+
+                telemetry.addData("Motor end position", motor.getCurrentPosition());
+                sleep(3000);
+
+
             }
-            if (yPressed) {
-                servo.setPosition(0.75);
-            }
-           */
 
             // Choose to drive using either Tank Mode, or POV Mode
             // Comment out the method that's not used.  The default below is POV.
@@ -177,12 +163,17 @@ public class TestDriveServoMechaWheels extends LinearOpMode {
             // Send calculated power to wheels
 
             if (strafeDirection == 0.0) {
+                robot.setPower(leftPower, rightPower);
+                /*
                 robot.leftDrive.setPower(leftPower);
                 robot.rightDrive.setPower(rightPower);
                 robot.leftFrontDrive.setPower(leftPower);
                 robot.rightFrontDrive.setPower(rightPower);
+                */
             } else {
                 //power is equal to the x value of the joystick so you are taing the - of a - or vice versa
+                robot.setStrafePower(strafeDirection);
+                /*
                 double power = strafeDirection;
                 if (strafeDirection > 0.0) {
                     // strafe right
@@ -204,6 +195,7 @@ public class TestDriveServoMechaWheels extends LinearOpMode {
                     telemetry.addData("strafing left", "yes");
 
                 }
+                */
             }
 
             // TBF: what are the values for the trigger?
