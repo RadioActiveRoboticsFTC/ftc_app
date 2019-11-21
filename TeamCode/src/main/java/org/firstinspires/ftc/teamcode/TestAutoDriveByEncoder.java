@@ -161,6 +161,8 @@ public class TestAutoDriveByEncoder extends LinearOpMode {
         double gain = 1.0;
         double angleError = 0.0;
 
+        boolean goingStraight = leftInches == rightInches;
+
         // Ensure that the opmode is still active
         if (opModeIsActive()) {
 
@@ -188,13 +190,15 @@ public class TestAutoDriveByEncoder extends LinearOpMode {
                    (runtime.seconds() < timeoutS) &&
                    (robot.leftDrive.isBusy() && robot.rightDrive.isBusy())) {
 
-                // what is our error?  How far off are we from our target angle?
-                yAxis = robot.getYAxisAngle();
-                angleError = yAxis - targetYangle;
+                if (goingStraight) {
+                    // what is our error?  How far off are we from our target angle?
+                    yAxis = robot.getYAxisAngle();
+                    angleError = yAxis - targetYangle;
 
-                // now correct how we are driving based off this error
-                powerCorrection = angleError * gain;
-                robot.setPower(power - powerCorrection, power + powerCorrection);
+                    // now correct how we are driving based off this error
+                    powerCorrection = angleError * gain;
+                    robot.setPower(power - powerCorrection, power + powerCorrection);
+                }
 
                 // Display it for the driver.
                 telemetry.addData("Path1",  "Running to %7d :%7d", newLeftTarget,  newRightTarget);
