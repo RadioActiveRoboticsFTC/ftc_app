@@ -67,7 +67,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@Autonomous(name="Pushbot: Our Drive By Encoder", group="Pushbot")
+@Autonomous(name="Our Drive By Encoder", group="Pushbot")
 //@Disabled
 public class TestAutoDriveByEncoder extends LinearOpMode {
 
@@ -125,7 +125,8 @@ public class TestAutoDriveByEncoder extends LinearOpMode {
         encoderDrive(DRIVE_SPEED,  48,  48, 10.0);  // S1: Forward 47 Inches with 5 Sec timeout
         sleep(1000);
 
-        encoderDrive(TURN_SPEED,   12, -12, 8.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
+        spinLeft(90, 0.3);
+        //encoderDrive(TURN_SPEED,   12, -12, 8.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
         sleep(1000);
 
 
@@ -147,12 +148,18 @@ public class TestAutoDriveByEncoder extends LinearOpMode {
      *  2) Move runs out of time
      *  3) Driver stops the opmode running.
      */
-    public void encoderDrive(double speed,
+    public void encoderDrive(double power,
                              double leftInches, double rightInches,
                              double timeoutS) {
         int newLeftTarget;
         int newRightTarget;
         double yAxis;
+
+        // this is the angle we will try to maintain
+        double targetYangle = robot.getYAxisAngle();
+        double powerCorrection = 0.0;
+        double gain = 1.0;
+        double angleError = 0.0;
 
         // Ensure that the opmode is still active
         if (opModeIsActive()) {
@@ -161,32 +168,15 @@ public class TestAutoDriveByEncoder extends LinearOpMode {
             newLeftTarget = robot.leftDrive.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
             newRightTarget = robot.rightDrive.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
 
-            /*
-            robot.leftDrive.setTargetPosition(newLeftTarget);
-            robot.rightDrive.setTargetPosition(newRightTarget);
-            robot.leftFrontDrive.setTargetPosition(newLeftTarget);
-            robot.rightFrontDrive.setTargetPosition(newRightTarget);
-            */
             robot.setTargetPosition(newLeftTarget, newRightTarget);
 
             // Turn On RUN_TO_POSITION
-            /*
-            robot.leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            robot.rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            robot.leftFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            robot.rightFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            */
             robot.setDriveMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             // reset the timeout time and start motion.
             runtime.reset();
-            /*
-            robot.leftDrive.setPower(Math.abs(speed));
-            robot.rightDrive.setPower(Math.abs(speed));
-            robot.leftFrontDrive.setPower(Math.abs(speed));
-            robot.rightFrontDrive.setPower(Math.abs(speed));
-            */
-            robot.setPower(Math.abs(speed));
+
+            robot.setPower(Math.abs(power));
 
             // keep looping while we are still active, and there is time left, and both motors are running.
             // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
@@ -198,8 +188,13 @@ public class TestAutoDriveByEncoder extends LinearOpMode {
                    (runtime.seconds() < timeoutS) &&
                    (robot.leftDrive.isBusy() && robot.rightDrive.isBusy())) {
 
-                angles = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-                yAxis = AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle);
+                // what is our error?  How far off are we from our target angle?
+                yAxis = robot.getYAxisAngle();
+                angleError = yAxis - targetYangle;
+
+                // now correct how we are driving based off this error
+                powerCorrection = angleError * gain;
+                robot.setPower(power - powerCorrection, power + powerCorrection);
 
                 // Display it for the driver.
                 telemetry.addData("Path1",  "Running to %7d :%7d", newLeftTarget,  newRightTarget);
@@ -210,28 +205,83 @@ public class TestAutoDriveByEncoder extends LinearOpMode {
             }
 
             // Stop all motion;
-
-
             robot.setPower(0);
 
             // Turn off RUN_TO_POSITION
-            /*
-            robot.leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            robot.rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            robot.leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            robot.rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            */
             robot.setDriveMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
             //  sleep(250);   // optional pause after each move
         }
     }
-            public void gyroTurn(double speed, double turnDegrees){
 
-                //angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+    public void spinLeft(double toAngle, double power) {
 
+        // angles to the left are positive, to the right negative
 
+        // this code turns left
+        double yAxisAngle;
+        boolean turning = true;
+
+        // Loop and update the dashboard
+        while (opModeIsActive() && turning) {
+            // what angle are we at right now?
+            //angles = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            //yAxisAngle = AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle);
+
+            yAxisAngle = robot.getYAxisAngle();
+
+            if (yAxisAngle >= toAngle) turning = false;
+
+            telemetry.addData("yAxis", yAxisAngle);
+            telemetry.addData("turning:", turning);
+            telemetry.update();
+
+            if (turning) {
+                // spin left
+                robot.setPower(-power, power);
+            }
         }
+
+        robot.setPower(0);
+
+
+    }
+
+    public void spinRight(double toAngle, double power) {
+
+        // angles to the left are positive, to the right negative
+
+        // this code turns left
+        double yAxisAngle;
+        boolean turning = true;
+//        double turnAngle = 45.0;
+//        double power = 0.2;
+
+        // Loop and update the dashboard
+        while (opModeIsActive() && turning) {
+            // what angle are we at right now?
+            //angles = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            //yAxisAngle = AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle);
+
+            yAxisAngle = robot.getYAxisAngle();
+
+            if (yAxisAngle <= toAngle) turning = false;
+
+            telemetry.addData("yAxis", yAxisAngle);
+            telemetry.addData("turning:", turning);
+            telemetry.update();
+
+            if (turning) {
+                // spin right
+                robot.setPower(power, -power);
+            }
+        }
+
+        robot.setPower(0);
+
+
+    }
+
 
 
 
