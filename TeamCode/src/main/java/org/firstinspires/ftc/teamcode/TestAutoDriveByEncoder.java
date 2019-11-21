@@ -33,6 +33,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -124,6 +125,9 @@ public class TestAutoDriveByEncoder extends LinearOpMode {
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
         encoderDrive(DRIVE_SPEED,  48,  48, 10.0);  // S1: Forward 47 Inches with 5 Sec timeout
         sleep(1000);
+        encoderDrive(DRIVE_SPEED,  -48,  -48, 10.0);  // S1: Forward 47 Inches with 5 Sec timeout
+
+
 
         spinLeft(90, 0.3);
         //encoderDrive(TURN_SPEED,   12, -12, 8.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
@@ -132,12 +136,13 @@ public class TestAutoDriveByEncoder extends LinearOpMode {
 
         encoderDrive(DRIVE_SPEED, -24, -24, 8.0);  // S3: Reverse 24 Inches with 4 Sec timeout
 
+
         //robot.leftClaw.setPosition(1.0);            // S4: Stop and close the claw.
         //robot.rightClaw.setPosition(0.0);
         sleep(10000);     // pause to read output
 
-        telemetry.addData("Path", "Complete");
-        telemetry.update();
+        //telemetry.addData("Path", "Complete");
+        //telemetry.update();
     }
 
     /*
@@ -158,8 +163,13 @@ public class TestAutoDriveByEncoder extends LinearOpMode {
         // this is the angle we will try to maintain
         double targetYangle = robot.getYAxisAngle();
         double powerCorrection = 0.0;
-        double gain = 1.0;
+        double gain = 0.01;
         double angleError = 0.0;
+
+        // debugging
+        double avgAngleError = 0.0;
+        double avgPowerCorrection = 0.0;
+        int numCorrections = 0;
 
         boolean goingStraight = leftInches == rightInches;
 
@@ -197,8 +207,24 @@ public class TestAutoDriveByEncoder extends LinearOpMode {
 
                     // now correct how we are driving based off this error
                     powerCorrection = angleError * gain;
-                    robot.setPower(power - powerCorrection, power + powerCorrection);
+                    // don't let this get out of control
+                    powerCorrection = Range.clip(powerCorrection, -0.5, 0.5) ;
+
+                    // are we going in reverse? if so, swap what we do
+                    if (leftInches < 0.0) powerCorrection = -powerCorrection;
+
+                    robot.setPower(power + powerCorrection, power - powerCorrection);
+
+                    telemetry.addData("Power Correction", powerCorrection);
+
+                    numCorrections += 1;
+                    avgAngleError += Math.abs(angleError);
+                    avgPowerCorrection += Math.abs(powerCorrection);
+
                 }
+
+                telemetry.addData("avg angle error", avgAngleError/numCorrections);
+                telemetry.addData("avg pwr corr", avgPowerCorrection/numCorrections);
 
                 // Display it for the driver.
                 telemetry.addData("Path1",  "Running to %7d :%7d", newLeftTarget,  newRightTarget);
