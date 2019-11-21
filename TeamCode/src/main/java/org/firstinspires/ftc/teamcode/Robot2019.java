@@ -37,6 +37,15 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
+import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 /**
@@ -213,6 +222,15 @@ public class Robot2019
             }
             motor.setPower(0);
             motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+
+        public double getYAxisAngle() {
+
+
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC,
+                        AxesOrder.ZYX,
+                        AngleUnit.DEGREES);
+            return AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle);
         }
 
 }
