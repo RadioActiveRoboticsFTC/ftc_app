@@ -72,7 +72,7 @@ import java.util.Locale;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@Autonomous(name="Pushbot: Our Drive By Encoder", group="Pushbot")
+@Autonomous(name="Our Drive By IMU", group="Pushbot")
 //@Disabled
 public class TestAutoDriveByEncoderAndIMU extends LinearOpMode {
 
@@ -126,30 +126,12 @@ public class TestAutoDriveByEncoderAndIMU extends LinearOpMode {
         // Start the logging of measured acceleration
         robot.imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
 
-        double yAxis;
-        boolean turning = true;
-        double turnAngle = 45.0;
-        double power = 0.5;
+        spinLeft(90.0, 0.3);
+        sleep(1000);
+        spinRight(-90.0, 0.3);
+        sleep(1000);
 
-        // Loop and update the dashboard
-        while (opModeIsActive() || turning) {
-
-            angles = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            yAxis = AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle);
-
-            if (yAxis >= turnAngle) turning = false;
-            telemetry.addData("yAxis", yAxis);
-            telemetry.addData("turning:", turning);
-
-            if (turning) {
-
-                //robot.rightDrive.setPower(power);
-                //robot.turnRight(power);
-            }
-        }
-
-        //robot.stop();
-
+        /*
         // after testing turning with IMU, test drive with encoders
 
         // Step through each leg of the path,
@@ -168,9 +150,81 @@ public class TestAutoDriveByEncoderAndIMU extends LinearOpMode {
         sleep(10000);     // pause to read output
 
         telemetry.addData("Path", "Complete");
+
+        */
         telemetry.update();
     }
 
+
+    public void spinLeft(double toAngle, double power) {
+
+        // angles to the left are positive, to the right negative
+
+        // this code turns left
+        double yAxisAngle;
+        boolean turning = true;
+//        double turnAngle = 45.0;
+//        double power = 0.2;
+
+        // Loop and update the dashboard
+        while (opModeIsActive() && turning) {
+            // what angle are we at right now?
+            //angles = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            //yAxisAngle = AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle);
+
+            yAxisAngle = robot.getYAxisAngle();
+
+            if (yAxisAngle >= toAngle) turning = false;
+
+            telemetry.addData("yAxis", yAxisAngle);
+            telemetry.addData("turning:", turning);
+            telemetry.update();
+
+            if (turning) {
+                // spin left
+                robot.setPower(-power, power);
+            }
+        }
+
+        robot.setPower(0);
+
+
+    }
+
+    public void spinRight(double toAngle, double power) {
+
+        // angles to the left are positive, to the right negative
+
+        // this code turns left
+        double yAxisAngle;
+        boolean turning = true;
+//        double turnAngle = 45.0;
+//        double power = 0.2;
+
+        // Loop and update the dashboard
+        while (opModeIsActive() && turning) {
+            // what angle are we at right now?
+            //angles = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            //yAxisAngle = AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle);
+
+            yAxisAngle = robot.getYAxisAngle();
+
+            if (yAxisAngle <= toAngle) turning = false;
+
+            telemetry.addData("yAxis", yAxisAngle);
+            telemetry.addData("turning:", turning);
+            telemetry.update();
+
+            if (turning) {
+                // spin right
+                robot.setPower(power, -power);
+            }
+        }
+
+        robot.setPower(0);
+
+
+    }
     /*
      *  Method to perfmorm a relative move, based on encoder counts.
      *  Encoders are not reset as the move is based on the current position.
