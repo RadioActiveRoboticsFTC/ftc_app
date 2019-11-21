@@ -101,17 +101,14 @@ public class TestDriveServoMechaWheels extends LinearOpMode {
             boolean xPressed = gamepad1.x;
             //boolean yPressed = gamepad1.y;
 
+            /*
             // test each motor
             if (xPressed) {
                 telemetry.addData("calling", "runMotorTickDistance");
                 DcMotor motor = null;
                 int distance = 1440;
                 double p = 0.5;
-                /*
-                if (gamepad1.a) robot.runMotorTickDistance(distance, power, robot.leftDrive);
-                if (gamepad1.b) robot.runMotorTickDistance(distance, power, robot.leftFrontDrive);
-                if (gamepad1.y) robot.runMotorTickDistance(distance, power, robot.rightDrive);
-                */
+
                 motor = robot.rightFrontDrive;
                 if (gamepad1.a) motor = robot.leftDrive;
                 if (gamepad1.b) motor = robot.leftFrontDrive;
@@ -126,7 +123,7 @@ public class TestDriveServoMechaWheels extends LinearOpMode {
 
 
             }
-
+            */
             // Choose to drive using either Tank Mode, or POV Mode
             // Comment out the method that's not used.  The default below is POV.
 
