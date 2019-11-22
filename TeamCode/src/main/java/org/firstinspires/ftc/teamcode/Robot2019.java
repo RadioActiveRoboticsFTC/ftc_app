@@ -102,6 +102,14 @@ public class Robot2019
     HardwareMap hwMap           =  null;
     private ElapsedTime period  = new ElapsedTime();
 
+
+    public double     COUNTS_PER_MOTOR_REV    = 795 ;    // our motor
+
+    public double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // This is < 1.0 if geared UP
+    public double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
+    public double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
+            (WHEEL_DIAMETER_INCHES * 3.1415);
+
     /* Constructor */
     public Robot2019(){
 
@@ -138,12 +146,14 @@ public class Robot2019
 
         // Set all motors to run without encoders.
         // May want to use RUN_USING_ENCODERS if encoders are installed.
+        /*
         leftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         leftFrontDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightFrontDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
+        */
+        setDriveMode(DcMotor.RunMode.RUN_USING_ENCODER);
         //leftArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // Define and initialize ALL installed servos.
