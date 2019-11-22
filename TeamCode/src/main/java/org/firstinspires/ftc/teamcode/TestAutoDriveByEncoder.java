@@ -76,7 +76,15 @@ public class TestAutoDriveByEncoder extends LinearOpMode {
     Robot2019              robot   = new Robot2019();   // Use a Pushbot's hardware
     private ElapsedTime runtime = new ElapsedTime();
 
-    static final double     COUNTS_PER_MOTOR_REV    = 1440 ;    // eg: TETRIX Motor Encoder
+    //static final double     COUNTS_PER_MOTOR_REV    = 1440 ;    // eg: TETRIX Motor Encoder
+    // gets us 45 of 48 inches
+    //static final double     COUNTS_PER_MOTOR_REV    = 765 ;    // our motor
+    // 46 of 48
+    //static final double     COUNTS_PER_MOTOR_REV    = 775 ;    // our motor
+    // 47 of 48
+    //static final double     COUNTS_PER_MOTOR_REV    = 785 ;    // our motor
+    static final double     COUNTS_PER_MOTOR_REV    = 795 ;    // our motor
+
     static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // This is < 1.0 if geared UP
     static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
@@ -123,8 +131,9 @@ public class TestAutoDriveByEncoder extends LinearOpMode {
 
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
-        encoderDrive(DRIVE_SPEED,  48,  48, 10.0);  // S1: Forward 47 Inches with 5 Sec timeout
-        sleep(1000);
+        encoderDrive(0.4,  12*4,  12*4, 30.0);  // S1: Forward 47 Inches with 5 Sec timeout
+        sleep(10000);
+        /*
         encoderDrive(DRIVE_SPEED,  -48,  -48, 10.0);  // S1: Forward 47 Inches with 5 Sec timeout
 
 
@@ -135,7 +144,7 @@ public class TestAutoDriveByEncoder extends LinearOpMode {
 
 
         encoderDrive(DRIVE_SPEED, -24, -24, 8.0);  // S3: Reverse 24 Inches with 4 Sec timeout
-
+        */
 
         //robot.leftClaw.setPosition(1.0);            // S4: Stop and close the claw.
         //robot.rightClaw.setPosition(0.0);
