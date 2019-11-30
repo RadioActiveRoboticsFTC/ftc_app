@@ -67,8 +67,7 @@ public class TestDriveServoMechaWheels extends LinearOpMode {
         Robot2019              robot   = new Robot2019();
         // Connect to servo (Assume PushBot Left Hand)
         // Change the text in quotes to match any servo name on your robot.
-       //leftservo = hardwareMap.get(Servo.class, "LeftServo");
-        //rightservo = hardwareMap.get(Servo.class, "RightServo");
+
         robot.init(hardwareMap);
         telemetry.addData("Status", "Initialized");
 
@@ -88,10 +87,6 @@ public class TestDriveServoMechaWheels extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
-            //AngularVelocity angularVelocity = imu.getAngularVelocity(AngleUnit.DEGREES);
-            //telemetry.addData("Ang Velocity:", " %f", angularVelocity.xRotationRate);
-
-
 
             // Setup a variable for each drive wheel to save power level for telemetry
             double leftPower;
@@ -101,106 +96,45 @@ public class TestDriveServoMechaWheels extends LinearOpMode {
             boolean xPressed = gamepad1.x;
             //boolean yPressed = gamepad1.y;
 
-            /*
-            // test each motor
-            if (xPressed) {
-                telemetry.addData("calling", "runMotorTickDistance");
-                DcMotor motor = null;
-                int distance = 1440;
-                double p = 0.5;
 
-                motor = robot.rightFrontDrive;
-                if (gamepad1.a) motor = robot.leftDrive;
-                if (gamepad1.b) motor = robot.leftFrontDrive;
-                if (gamepad1.y) motor = robot.rightDrive;
-                telemetry.addData("Motor", motor.getDeviceName());
-                telemetry.addData("Motor start position", motor.getCurrentPosition());
-
-                robot.runMotorTickDistance(distance, p, motor);
-
-                telemetry.addData("Motor end position", motor.getCurrentPosition());
-                sleep(3000);
-
-
-            }
-            */
             // Choose to drive using either Tank Mode, or POV Mode
             // Comment out the method that's not used.  The default below is POV.
 
-            // POV Mode uses left stick to go forward, and right stick to turn.
+            // POV Mode uses left stick to go forward, left stick x-values to strafe, and right stick to turn.
             // - This uses basic math to combine motions and is easier to drive straight.
             double drive = -gamepad1.left_stick_y;
             double turn  =  gamepad1.right_stick_x;
             leftPower    = Range.clip(drive + turn, -1, 1) ;
             rightPower   = Range.clip(drive - turn, -1, 1) ;
 
-
+            //values for strafing
             double strafeDirection = gamepad1.left_stick_x;
 
             // claw arms can be open and closed.
-            // left motor:
-            /*
-            float closedPositionL = (float) .9;
-            float openPositionL = (float) .4;
-            float triggerDownL = (float) 1.0;
-
-            float closedPositionR = (float) .3;
-            float openPositionR = (float) .8;
-            float triggerDownR = (float) 1.0;
-            */
 
             // TBF: what are the values for the trigger?
             // for now, assume down == 1.0, and up is 0.0
             float leftTriggerValue = gamepad1.left_trigger;
-            // Tank Mode uses one stick to control each wheel.
-            // - This requires no math, but it is hard to drive forward slowly and keep straight.
-            // leftPower  = -gamepad1.left_stick_y ;
-            // rightPower = -gamepad1.right_stick_y ;
+
 
             // Send calculated power to wheels
-
+            //if you are not strafing, drive normally
             if (strafeDirection == 0.0) {
+
                 robot.setPower(leftPower, rightPower);
-                /*
-                robot.leftDrive.setPower(leftPower);
-                robot.rightDrive.setPower(rightPower);
-                robot.leftFrontDrive.setPower(leftPower);
-                robot.rightFrontDrive.setPower(rightPower);
-                */
-            } else {
-                //power is equal to the x value of the joystick so you are taing the - of a - or vice versa
-                robot.setStrafePower(strafeDirection);
-                /*
-                double power = strafeDirection;
-                if (strafeDirection > 0.0) {
-                    // strafe right
-                    robot.leftDrive.setPower(-power);
-                    robot.rightDrive.setPower(power);
 
-                    robot.leftFrontDrive.setPower(power);
-                    robot.rightFrontDrive.setPower(-power);
-                    telemetry.addData("strafing right", "yes");
-
-                }
-                if (strafeDirection < 0.0)    {
-                    // strafe left
-                    robot.leftDrive.setPower(-power);
-                    robot.rightDrive.setPower(power);
-
-                    robot.leftFrontDrive.setPower(power);
-                    robot.rightFrontDrive.setPower(-power);
-                    telemetry.addData("strafing left", "yes");
-
-                }
-                */
             }
+            //otherwise strafe either left or right, at variable power
+            else {
+                //power is equal to the x value of the joystick so you are taking the - of a - or vice versa
 
-            // TBF: what are the values for the trigger?
-            // for now, assume down == 1.0, and up is 0.0
-            //float leftTriggerValue = gamepad1.left_trigger;
+                robot.setStrafePower(strafeDirection);
+
+            }
 
             telemetry.addData("left trigger value", leftTriggerValue);
 
+            //open and close the claws of the servo independetly
             if (leftTriggerValue < robot.triggerDownL) {
                 leftposition = robot.closedPositionL;
             }
@@ -226,30 +160,7 @@ public class TestDriveServoMechaWheels extends LinearOpMode {
             robot.rightServo.setPosition(rightposition);
             //sleep(CYCLE_MS);
             idle();
-
-
-
-            //double power = 0.5;
-
-            // strafe right
-            /*
-            leftDrive.setPower(-power);
-            rightDrive.setPower(power);
-
-            leftDriveFront.setPower(power);
-            rightDriveFront.setPower(-power);
-            */
-            // strafe left
-            /*
-            leftDrive.setPower(power);
-            rightDrive.setPower(-power);
-
-            leftDriveFront.setPower(-power);
-            rightDriveFront.setPower(power);
-            */
-
-            //leftDrive.getCurrentPosition();
-            //rightDrive.getCurrentPosition();
+            
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
@@ -257,6 +168,7 @@ public class TestDriveServoMechaWheels extends LinearOpMode {
             telemetry.addData("left joystick x", strafeDirection);
             telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
             telemetry.addData("X Pressed?", "%s", xPressed);
+            telemetry.addData("RF pos", robot.rightFrontDrive.getCurrentPosition());
             telemetry.update();
         }
     }
