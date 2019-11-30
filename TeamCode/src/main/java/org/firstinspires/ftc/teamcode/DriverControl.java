@@ -56,7 +56,7 @@ import java.util.List;
  */
 
 @TeleOp(name="Working Remote Control", group="Linear Opmode")
-public class TestDriveServoMechaWheels extends LinearOpMode {
+public class DriverControl extends LinearOpMode {
 
 
     private ElapsedTime runtime = new ElapsedTime();
