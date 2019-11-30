@@ -70,7 +70,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 @Autonomous(name="Our Drive By Encoder", group="Pushbot")
 //@Disabled
-public class TestAutoDriveByEncoder extends LinearOpMode {
+public class BaseAutonomous extends LinearOpMode {
 
     /* Declare OpMode members. */
     Robot2019              robot   = new Robot2019();   // Use a Pushbot's hardware
