@@ -74,6 +74,9 @@ public class Robot2019
     public DcMotor leftFrontDrive   = null;
     public DcMotor rightFrontDrive  = null;
 
+    //Linear slider motor
+    public DcMotor sliderMotor = null;
+
     //public DcMotor  leftArm     = null;
     public Servo leftServo    = null;
     public Servo rightServo   = null;
@@ -128,6 +131,8 @@ public class Robot2019
         leftFrontDrive  = hwMap.get(DcMotor.class, "left_front_drive");
         rightFrontDrive = hwMap.get(DcMotor.class, "right_front_drive");
 
+        //Slider Motor
+        sliderMotor = hwMap.get(DcMotor.class, "slider_motor");
 
         //leftArm    = hwMap.get(DcMotor.class, "left_arm");
         leftDrive.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
