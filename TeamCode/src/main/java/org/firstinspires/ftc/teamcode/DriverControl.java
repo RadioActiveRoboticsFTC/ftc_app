@@ -132,6 +132,21 @@ public class DriverControl extends LinearOpMode {
 
             }
 
+            // code for linear slider
+            double yAxis = gamepad1.right_stick_y;
+            boolean aPressed = gamepad1.a;
+
+            //transition moving up state
+            if (yAxis < 0){
+                robot.sliderMotor.setPower(yAxis);
+            }
+            //transition to stall state, change power value TBF
+            if(aPressed){
+                robot.sliderMotor.setPower(-0.5);
+            }
+            if(yAxis >= 0 && !aPressed){
+                robot.sliderMotor.setPower(0);
+            }
             telemetry.addData("left trigger value", leftTriggerValue);
 
             //open and close the claws of the servo independetly
