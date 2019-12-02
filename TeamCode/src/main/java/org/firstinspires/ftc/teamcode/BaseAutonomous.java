@@ -96,6 +96,12 @@ public class BaseAutonomous extends LinearOpMode {
     Orientation angles;
     //Acceleration gravity;
 
+    // For this base class, we do nothing
+    public void runAutoOpMode() {
+        // do a whole lot of nothing.
+        // to do something, extend this base class, and overide this function
+    }
+
     @Override
     public void runOpMode() {
 
@@ -129,10 +135,14 @@ public class BaseAutonomous extends LinearOpMode {
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
+        runAutoOpMode();
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
-        encoderDrive(0.4,  12*4,  12*4, 30.0);  // S1: Forward 47 Inches with 5 Sec timeout
-        sleep(10000);
+        //encoderDrive(0.4,  12*4,  12*4, 30.0);  // S1: Forward 47 Inches with 5 Sec timeout
+        //driveStraight(0.4, 12*4, 30.0);
+        //sleep(10000);
+
+
         /*
         encoderDrive(DRIVE_SPEED,  -48,  -48, 10.0);  // S1: Forward 47 Inches with 5 Sec timeout
 
@@ -152,6 +162,11 @@ public class BaseAutonomous extends LinearOpMode {
 
         //telemetry.addData("Path", "Complete");
         //telemetry.update();
+    }
+
+    // drive straight a certain distance using encoders and IMU
+    public void driveStraight(double power, double inches, double timoutSecs) {
+        encoderDrive(power, inches, inches, timoutSecs);
     }
 
     /*
