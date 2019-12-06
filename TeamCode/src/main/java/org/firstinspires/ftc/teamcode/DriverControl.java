@@ -96,25 +96,36 @@ public class DriverControl extends LinearOpMode {
             boolean xPressed = gamepad1.x;
             //boolean yPressed = gamepad1.y;
 
-
+            float gear = gamepad1.right_trigger;
             // Choose to drive using either Tank Mode, or POV Mode
             // Comment out the method that's not used.  The default below is POV.
 
             // POV Mode uses left stick to go forward, left stick x-values to strafe, and right stick to turn.
+
             // - This uses basic math to combine motions and is easier to drive straight.
-            double drive = -gamepad1.left_stick_y;
-            double turn  =  gamepad1.right_stick_x;
+            double drive;
+            double turn;
+            double strafeDirection;
+            if(gear < robot.gearTriggerDown){
+                drive = -gamepad1.left_stick_y;
+                turn = gamepad1.right_stick_x;
+                //values for strafing
+                strafeDirection = gamepad1.left_stick_x;
+            }
+            else {
+                drive = -gamepad1.left_stick_y/3;
+                turn = gamepad1.right_stick_x/3;
+                //values for strafing
+                strafeDirection = gamepad1.left_stick_x/3;
+            }
             leftPower    = Range.clip(drive + turn, -1, 1) ;
             rightPower   = Range.clip(drive - turn, -1, 1) ;
-
-            //values for strafing
-            double strafeDirection = gamepad1.left_stick_x;
 
             // claw arms can be open and closed.
 
             // TBF: what are the values for the trigger?
             // for now, assume down == 1.0, and up is 0.0
-            float leftTriggerValue = gamepad1.left_trigger;
+            float leftTriggerValue = gamepad2.left_trigger;
 
 
             // Send calculated power to wheels
@@ -133,8 +144,8 @@ public class DriverControl extends LinearOpMode {
             }
 
             // code for linear slider
-            double yAxis = gamepad1.right_stick_y;
-            boolean aPressed = gamepad1.a;
+            double yAxis = gamepad2.left_stick_y;
+            boolean aPressed = gamepad2.a;
 
             //transition moving up state
             if (yAxis < 0){
@@ -160,7 +171,7 @@ public class DriverControl extends LinearOpMode {
 
             // if right trigger pressed right servo goes to closed position
 
-            float rightTriggerValue = gamepad1.right_trigger;
+            float rightTriggerValue = gamepad2.right_trigger;
             if (rightTriggerValue < robot.triggerDownR){
                 rightposition = robot.closedPositionR;}
 
