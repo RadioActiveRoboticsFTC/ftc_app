@@ -126,6 +126,7 @@ public class BaseAutonomous extends LinearOpMode {
 
         robot.setDriveMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+
         // Send telemetry message to indicate successful Encoder reset
         telemetry.addData("Path0",  "Starting at %7d :%7d",
                           robot.leftDrive.getCurrentPosition(),
@@ -134,6 +135,12 @@ public class BaseAutonomous extends LinearOpMode {
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
+
+           //close claws
+        robot.leftServo.setPosition(robot.openPositionL);
+        robot.rightServo.setPosition(robot.openPositionR);
+
+        sleep(1000);
 
         runAutoOpMode();
         // Step through each leg of the path,
