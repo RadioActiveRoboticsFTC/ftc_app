@@ -82,12 +82,14 @@ public class Robot2019
     public Servo rightServo   = null;
 
     float closedPositionL = (float) .9;
-    float openPositionL = (float) .4;
+    float openPositionL = (float) .475;
     float triggerDownL = (float) 1.0;
 
     float closedPositionR = (float) .3;
-    float openPositionR = (float) .8;
+    float openPositionR = (float) .75;
     float triggerDownR = (float) 1.0;
+
+    float gearTriggerDown = (float) 1.0;
 
     public static final double MID_SERVO       =  0.5 ;
     public static final double ARM_UP_POWER    =  0.45 ;
@@ -183,8 +185,12 @@ public class Robot2019
         // and named "imu".
         imu = hwMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
+
+
         leftServo = hwMap.get(Servo.class, "LeftServo");
         rightServo = hwMap.get(Servo.class, "RightServo");
+
+
     }
 
         public void setPower(double power){
