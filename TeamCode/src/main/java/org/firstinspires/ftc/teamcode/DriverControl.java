@@ -127,7 +127,7 @@ public class DriverControl extends LinearOpMode {
             // for now, assume down == 1.0, and up is 0.0
             float leftTriggerValue = gamepad2.left_trigger;
 
-
+            float strafeTrigger = gamepad1.left_trigger;
             // Send calculated power to wheels
             //if you are not strafing, drive normally
             if (strafeDirection == 0.0) {
@@ -136,16 +136,15 @@ public class DriverControl extends LinearOpMode {
 
             }
             //otherwise strafe either left or right, at variable power
-            else {
+            else if (strafeTrigger > robot.strafeTriggerDown) {
                 //power is equal to the x value of the joystick so you are taking the - of a - or vice versa
-
                 robot.setStrafePower(strafeDirection);
 
             }
 
             // code for linear slider
             double yAxis = gamepad2.left_stick_y;
-            boolean aPressed = gamepad2.a;
+            boolean aPressed =  gamepad2.a;
 
             //transition moving up state
             if (yAxis < 0){
@@ -156,7 +155,7 @@ public class DriverControl extends LinearOpMode {
                 robot.sliderMotor.setPower(-0.5);
             }
             if(yAxis >= 0 && !aPressed){
-                robot.sliderMotor.setPower(0);
+                robot.sliderMotor.setPower(yAxis/4 );
             }
             telemetry.addData("left trigger value", leftTriggerValue);
 
