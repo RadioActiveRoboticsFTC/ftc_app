@@ -81,6 +81,9 @@ public class Robot2019
     public Servo leftServo    = null;
     public Servo rightServo   = null;
 
+    public Servo rearRightServo = null;
+    public Servo rearLeftServo = null;
+
     float closedPositionL = (float) .8;
     float openPositionL = (float) .475;
     float triggerDownL = (float) 1.0;
@@ -192,10 +195,26 @@ public class Robot2019
         leftServo = hwMap.get(Servo.class, "LeftServo");
         rightServo = hwMap.get(Servo.class, "RightServo");
 
+        rearLeftServo = hwMap.get(Servo.class, "RearLeftServo");
+        rearRightServo = hwMap.get(Servo.class, "RearRightServo");
+
 
     }
+    //This gets the servo in its starting position
+    public void raiseRearServos() {
+        rearRightServo.setPosition(0);
+        rearLeftServo.setPosition(0.9);
+    }
+    //This gets the servo to its clamped position
+    public void lowerRearServos() {
+        rearRightServo.setPosition(0.7);
+        rearLeftServo.setPosition(0.3);
+    }
 
-        public void setPower(double power){
+
+
+
+    public void setPower(double power){
             leftDrive.setPower(power);
             rightDrive.setPower(power);
             leftFrontDrive.setPower(power);
