@@ -144,7 +144,7 @@ public class DriverControl extends LinearOpMode {
 
             // code for linear slider
             double yAxis = gamepad2.left_stick_y;
-            boolean aPressed =  gamepad2.a;
+            boolean aPressed =   gamepad2.a;
 
             //transition moving up state
             if (yAxis < 0){
@@ -181,8 +181,19 @@ public class DriverControl extends LinearOpMode {
             telemetry.addData(" Left Servo Position", "%5.2f", leftposition);
             telemetry.addData(">", "Press Stop to end test." );
 
+
+            if (gamepad2.b) {
+                robot.lowerRearServos();
+
+            } else {
+                robot.raiseRearServos();
+
+            }
             robot.leftServo.setPosition(leftposition);
             robot.rightServo.setPosition(rightposition);
+
+
+
             //sleep(CYCLE_MS);
             idle();
             
