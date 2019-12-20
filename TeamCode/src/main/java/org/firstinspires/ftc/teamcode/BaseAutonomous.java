@@ -136,10 +136,10 @@ public class BaseAutonomous extends LinearOpMode {
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
-           //close claws
+         /*  //close claws
         robot.leftServo.setPosition(robot.openPositionL);
         robot.rightServo.setPosition(robot.openPositionR);
-
+           */
         sleep(1000);
 
         runAutoOpMode();
@@ -282,6 +282,8 @@ public class BaseAutonomous extends LinearOpMode {
         // this code turns left
         double yAxisAngle;
         boolean turning = true;
+        double prevAngle = robot.getYAxisAngle();
+        //boolean posAngle = yAxisAngle > 0;
 
         // Loop and update the dashboard
         while (opModeIsActive() && turning) {
@@ -290,6 +292,8 @@ public class BaseAutonomous extends LinearOpMode {
             //yAxisAngle = AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle);
 
             yAxisAngle = robot.getYAxisAngle();
+            if (yAxisAngle < 0 && prevAngle > 0) turning = false;
+            prevAngle = yAxisAngle;
 
             if (yAxisAngle >= toAngle) turning = false;
 
@@ -303,6 +307,9 @@ public class BaseAutonomous extends LinearOpMode {
             }
         }
 
+        //Brake
+        robot.setPower(power,-power);
+        sleep(10);
         robot.setPower(0);
 
 
