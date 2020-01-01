@@ -23,7 +23,8 @@ public class Autonomus3 extends BaseAutonomous {
 
     @Override
     public void runAutoOpMode() {
-
+        robot.closeClaws();
+        sleep(2000);
 
         driveStraight(0.5, 24.0, 15.0);
         spinRight(-70,0.5);
