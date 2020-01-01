@@ -24,6 +24,8 @@ public class Autonomous2 extends BaseAutonomous {
     @Override
     public void runAutoOpMode() {
 
+        robot.closeClaws();
+        sleep(2000);
 
         driveStraight(0.5, 24.0, 15.0);
         spinLeft(70,0.5);
