@@ -277,8 +277,9 @@ public class BaseAutonomous extends LinearOpMode {
 
     public void spinLeft(double toAngle, double power) {
 
-        // angles to the left are positive, to the right negative
-
+        // IRELEVENT angles to the left are positive, to the right negative
+        // makes it so whatever the user inputs will be positive
+        toAngle = Math.abs(toAngle);
         // this code turns left
         double yAxisAngle;
         boolean turning = true;
@@ -317,7 +318,9 @@ public class BaseAutonomous extends LinearOpMode {
 
     public void spinRight(double toAngle, double power) {
 
-        // angles to the left are positive, to the right negative
+        // makes it so whatever the user inputs the value returned will be negitive
+        toAngle = Math.abs(toAngle);
+        toAngle = toAngle*-1;
 
         // this code turns left
         double yAxisAngle;
