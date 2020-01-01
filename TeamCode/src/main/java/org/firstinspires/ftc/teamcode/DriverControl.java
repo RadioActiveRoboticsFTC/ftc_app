@@ -130,6 +130,13 @@ public class DriverControl extends LinearOpMode {
             float strafeTrigger = gamepad1.left_trigger;
             // Send calculated power to wheels
             //if you are not strafing, drive normally
+            if (strafeTrigger > robot.strafeTriggerDown){
+                robot.setStrafePower(strafeDirection);
+            }
+            else{
+                robot.setPower(leftPower, rightPower);
+            }
+            /*
             if (strafeDirection == 0.0) {
 
                 robot.setPower(leftPower, rightPower);
@@ -141,7 +148,7 @@ public class DriverControl extends LinearOpMode {
                 robot.setStrafePower(strafeDirection);
 
             }
-
+            */
             // code for linear slider
             double yAxis = gamepad2.left_stick_y;
             boolean aPressed =   gamepad2.a;
