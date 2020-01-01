@@ -20,7 +20,8 @@ public class Autonomous1 extends BaseAutonomous {
     // We 'overrid' runAutoOpMode to do *something*
     @Override
     public void runAutoOpMode() {
-
+        robot.closeClaws();
+        sleep(2000);
         // driving straight this distance parks the robot directly under
         // the sky bridge
         driveStraight(0.5, 9.0, 15.0);
