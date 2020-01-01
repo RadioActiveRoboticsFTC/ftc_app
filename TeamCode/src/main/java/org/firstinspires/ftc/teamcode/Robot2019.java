@@ -274,7 +274,24 @@ public class Robot2019
                         AngleUnit.DEGREES);
             return AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle);
         }
+        //function to brake the robot, set the direction to 1 or -1,
+        //1 for braking after going forward, -1 for backward
+        public void brake(double direction){
+            setPower(-.2*direction);
+            //sleep(10);
+            setPower(0);
+        }
 
+        public void closeClaws(){
+            leftServo.setPosition(openPositionL);
+            rightServo.setPosition(openPositionR);
+
+        }
+
+        public void openClaws(){
+            rightServo.setPosition(closedPositionR);
+            leftServo.setPosition(closedPositionL);
+        }
 }
 
 
