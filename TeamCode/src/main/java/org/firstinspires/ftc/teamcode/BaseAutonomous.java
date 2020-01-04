@@ -89,8 +89,8 @@ public class BaseAutonomous extends LinearOpMode {
     static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
                                                       (WHEEL_DIAMETER_INCHES * 3.1415);
-    static final double     DRIVE_SPEED             = 0.4; //0.6;
-    static final double     TURN_SPEED              = 0.4; //0.5;
+    //static final double     DRIVE_SPEED             = 0.4; //0.6;
+    //static final double     TURN_SPEED              = 0.4; //0.5;
 
     // State used for updating telemetry
     Orientation angles;
@@ -353,6 +353,96 @@ public class BaseAutonomous extends LinearOpMode {
 
     }
 
+    public void spinLeftP(double toAngle, double power) {
+
+        // IRELEVENT angles to the left are positive, to the right negative
+        // makes it so whatever the user inputs will be positive
+        toAngle = Math.abs(toAngle);
+        // this code turns left
+        double yAxisAngle;
+        yAxisAngle = robot.getYAxisAngle();
+        double totalAngularDistance = toAngle-yAxisAngle;
+        boolean turning = true;
+        double prevAngle = robot.getYAxisAngle();
+        //boolean posAngle = yAxisAngle > 0;
+
+        // Loop and update the dashboard
+        while (opModeIsActive() && turning) {
+            //what angle are we at right now?
+            //angles = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            //yAxisAngle = AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle);
+
+            yAxisAngle = robot.getYAxisAngle();
+            if (yAxisAngle < 0 && prevAngle > 0) turning = false;
+            prevAngle = yAxisAngle;
+
+            // proportional power
+            double percentAngularDistance = (toAngle-yAxisAngle)/totalAngularDistance;
+            double proportionalPower = percentAngularDistance * power;
+            proportionalPower = Range.clip(proportionalPower, .1, power);
+
+            if (yAxisAngle >= toAngle) turning = false;
+
+            telemetry.addData("yAxis", yAxisAngle);
+            telemetry.addData("turning:", turning);
+            telemetry.update();
+
+            if (turning) {
+                // spin left
+                robot.setPower(-power, power);
+            }
+        }
+
+        //Brake
+        robot.setPower(power,-power);
+        sleep(10);
+        robot.setPower(0);
+
+
+    }
+
+    public void spinRightP (double toAngle, double power) {
+
+        // makes it so whatever the user inputs the value returned will be negitive
+        toAngle = Math.abs(toAngle);
+        toAngle = toAngle*-1;
+
+        // this code turns left
+        double yAxisAngle;
+        yAxisAngle = robot.getYAxisAngle();
+        boolean turning = true;
+//        double turnAngle = 45.0;
+//        double power = 0.2;
+        double totalAngularDistance = toAngle-yAxisAngle;
+        // Loop and update the dashboard
+        while (opModeIsActive() && turning) {
+            // what angle are we at right now?
+            //angles = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            //yAxisAngle = AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle);
+
+            //yAxisAngle = robot.getYAxisAngle();
+
+            // proportional power
+            double percentAngularDistance = (toAngle-yAxisAngle)/totalAngularDistance;
+            double proportionalPower = percentAngularDistance * power;
+            proportionalPower = Range.clip(proportionalPower, .1, power);
+
+            if (yAxisAngle <= toAngle) turning = false;
+
+            telemetry.addData("yAxis", yAxisAngle);
+            telemetry.addData("turning:", turning);
+            telemetry.update();
+
+            if (turning) {
+                // spin right
+                robot.setPower(proportionalPower, -proportionalPower);
+            }
+        }
+
+        robot.setPower(0);
+
+
+    }
 
 
 
