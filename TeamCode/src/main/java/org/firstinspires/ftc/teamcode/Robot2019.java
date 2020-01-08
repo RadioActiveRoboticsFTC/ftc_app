@@ -85,11 +85,14 @@ public class Robot2019
     public Servo rearLeftServo = null;
 
     float closedPositionL = (float) .8;
+    float straightPositionL = (float) .52;
     float openPositionL = (float) .475;
     float triggerDownL = (float) 1.0;
 
     float closedPositionR = (float) .4;
     float openPositionR = (float) .75;
+    float straitPositionR = (float) .67;
+
     float triggerDownR = (float) 1.0;
 
     float gearTriggerDown = (float) 0.7;
@@ -163,9 +166,11 @@ public class Robot2019
         rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         leftFrontDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightFrontDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightFrontDr ive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         */
         setDriveMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        sliderMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         //leftArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // Define and initialize ALL installed servos.
@@ -285,6 +290,12 @@ public class Robot2019
         public void closeClaws(){
             leftServo.setPosition(openPositionL);
             rightServo.setPosition(openPositionR);
+
+        }
+
+        public void straightClaws(){
+            leftServo.setPosition(straightPositionL);
+            rightServo.setPosition(straitPositionR);
 
         }
 
