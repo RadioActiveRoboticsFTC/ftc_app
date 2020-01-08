@@ -279,7 +279,8 @@ public class BaseAutonomous extends LinearOpMode {
 
         // IRELEVENT angles to the left are positive, to the right negative
         // makes it so whatever the user inputs will be positive
-        toAngle = Math.abs(toAngle);
+//        toAngle = Math.abs(toAngle);
+
         // this code turns left
         double yAxisAngle;
         boolean turning = true;
@@ -319,8 +320,8 @@ public class BaseAutonomous extends LinearOpMode {
     public void spinRight(double toAngle, double power) {
 
         // makes it so whatever the user inputs the value returned will be negitive
-        toAngle = Math.abs(toAngle);
-        toAngle = toAngle*-1;
+//        toAngle = Math.abs(toAngle);
+//        toAngle = toAngle*-1;
 
         // this code turns left
         double yAxisAngle;
@@ -444,6 +445,88 @@ public class BaseAutonomous extends LinearOpMode {
 
     }
 
+    // this program moves the foundation into the building zone,
+    // for both sides depending on 'blueSide' input variable
+    void moveFoundation(boolean blueSide)
+    {
+        double straightSpeed = .5;
+        double turnSpeed = .3;
+        // in theory, we know how far we need to go,
+        // but in practice we are off by 'offset'
+        double offset = 2.0;
+        double dist = (4*12) - 18 - offset;
 
+        // move up to the foundation so that we are positioned
+        // to drop our claws on top of it
 
+        //robot.setStrafePower(-.3);
+        //sleep(500);
+        //robot.setPower(0);
+        // sleep(5000);
+        //robot.brake();
+        //driveStraight(straightSpeed,dist,20);
+        //robot.brake(1);
+
+        // the purpose of this next group of code is to start
+        // in a legal position, but then end in the middle of the foundation
+        driveStraight(straightSpeed,dist/3,20);
+        robot.brake(1);
+
+        spinLeft(45,0.1);
+
+        driveStraight(straightSpeed,(dist/3)+5,20);
+        robot.brake(1);
+
+        spinRight(4,0.1);
+
+        driveStraight(straightSpeed,dist/3 ,20);
+        robot.brake(1);
+
+        // close claws so that they will drop down on top of the foundation
+        robot.straightClaws();
+
+        sleep(500);
+
+        // go backwards so that the grooves catch on the foundation edge,
+        // and we can start dragging the foundation towards the building site.
+        driveStraight(0.1,-(dist - 4),20 );
+
+        // this part of the code unattaches the robot from the
+        // foundation by lifting linear slider, and opening claws,
+        // and letting go of slider
+        robot.sliderMotor.setPower(1);
+        sleep(700);
+        robot.openClaws();
+
+        //drop linear slider
+        robot.sliderMotor.setPower(0);
+
+        // now we need to get to the other side of the side of the foundation,
+        // so we can push it further into the building zone
+        spinRight(-90,.1);
+        driveStraight(.2,28,10);
+        //make sure the linear slider is all the way down
+        // so that we don't drive OVER the foundation
+        robot.closeClaws();
+        sleep(1000);
+        robot.openClaws();
+
+        spinLeft(0,.1);
+
+        driveStraight(.75, 44,20);
+        robot.brake(1);
+        spinLeft(90, turnSpeed);
+        driveStraight(.75,12, 20);
+        robot.brake(1);
+        spinLeft(180, .1);
+
+        // push the foundation into the building zone
+        driveStraight(.75,50, 20);
+        /*
+        robot.setStrafePower(-.5);
+        sleep(1000);
+        robot.setPower(0);
+        */
+
+    }
 }
