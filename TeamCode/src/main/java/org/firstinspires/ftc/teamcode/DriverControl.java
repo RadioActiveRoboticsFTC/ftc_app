@@ -82,7 +82,9 @@ public class DriverControl extends LinearOpMode {
 
         double rightposition = 0.0;
         double leftposition = 0.0;
-
+        //Get the initial value of our slider motor position
+        double sliderStart = robot.sliderMotor.getCurrentPosition();
+        boolean previousSliderBad = false;
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -152,17 +154,31 @@ public class DriverControl extends LinearOpMode {
             // code for linear slider
             double yAxis = gamepad2.left_stick_y;
             boolean aPressed =   gamepad2.a;
+            double sliderPos = robot.sliderMotor.getCurrentPosition();
+            telemetry.addData("Slider Pos", sliderPos);
 
-            //transition moving up state
-            if (yAxis < 0){
-                robot.sliderMotor.setPower(yAxis);
+            // This is false if the linear slider is within the proper range
+            boolean isSliderBad = sliderPos > sliderStart+40;
+            if(isSliderBad == false && previousSliderBad == true){
+                robot.sliderMotor.setPower(0);
             }
-            //transition to stall state, change power value TBF
-            if(aPressed){
-                robot.sliderMotor.setPower(-0.5);
+            previousSliderBad = isSliderBad;
+            if(isSliderBad){
+                robot.sliderMotor.setPower(-0.7);
             }
-            if(yAxis >= 0 && !aPressed){
-                robot.sliderMotor.setPower(yAxis/4 );
+            else {
+                //transition moving up state
+                if (yAxis < 0) {
+                    robot.sliderMotor.setPower(yAxis);
+                }
+                //transition to stall state, change power value TBF
+                if (aPressed) {
+                    robot.sliderMotor.setPower(-0.5);
+                }
+
+                if (yAxis >= 0 && !aPressed) {
+                    robot.sliderMotor.setPower(yAxis / 4);
+                }
             }
             telemetry.addData("left trigger value", leftTriggerValue);
 
