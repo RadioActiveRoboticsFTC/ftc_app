@@ -23,6 +23,8 @@ public class Autonomous4 extends BaseAutonomous {
         moveFoundation(blueSide);
 
         // park!
+        robot.setStrafePower(.5);
+        sleep(400);
         robot.setStrafePower(-.5);
         sleep(1200);
         robot.setPower(0);
