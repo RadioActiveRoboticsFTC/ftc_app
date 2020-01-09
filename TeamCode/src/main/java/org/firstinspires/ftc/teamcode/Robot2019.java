@@ -52,23 +52,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
  * This is NOT an opmode.
  *
  * This class can be used to define all the specific hardware for a single robot.
- * In this case that robot is a Pushbot.
- * See PushbotTeleopTank_Iterative and others classes starting with "Pushbot" for usage examples.
- *
- * This hardware class assumes the following device names have been configured on the robot:
- * Note:  All names are lower case and some have single spaces between words.
- *
- * Motor channel:  Left  drive motor:        "left_drive"
- * Motor channel:  Right drive motor:        "right_drive"
- * Motor channel:  Manipulator drive motor:  "left_arm"
- * Servo channel:  Servo to open left claw:  "left_hand"
- * Servo channel:  Servo to open right claw: "right_hand"
  */
 
-// this is a test comment
 public class Robot2019
 {
-    /* Public OpMode members. */
+
+    // motors for our chassis & drive train
     public DcMotor leftDrive   = null;
     public DcMotor rightDrive  = null;
     public DcMotor leftFrontDrive   = null;
@@ -77,12 +66,20 @@ public class Robot2019
     //Linear slider motor
     public DcMotor sliderMotor = null;
 
-    //public DcMotor  leftArm     = null;
+    // these are the servos for the claw
     public Servo leftServo    = null;
     public Servo rightServo   = null;
 
     public Servo rearRightServo = null;
     public Servo rearLeftServo = null;
+
+    public Servo capServo = null;
+
+    /*
+    This section is for the hardcoded positions of the various servos
+     */
+    float raisedPositionCap = (float) 0.3;
+    float dropPositionCap = (float)   0.57;
 
     float closedPositionL = (float) .8;
     float straightPositionL = (float) .52;
@@ -93,35 +90,19 @@ public class Robot2019
     float openPositionR = (float) .75;
     float straitPositionR = (float) .67;
 
+    // these are for the gamepads, so shouldn't be in here
     float triggerDownR = (float) 1.0;
-
     float gearTriggerDown = (float) 0.7;
-
     float strafeTriggerDown =  (float) 0.70;
-
-    public static final double MID_SERVO       =  0.5 ;
-    public static final double ARM_UP_POWER    =  0.45 ;
-    public static final double ARM_DOWN_POWER  = -0.45 ;
 
     // The IMU sensor object
     BNO055IMU imu;
 
     // State used for updating telemetry
     Orientation angles;
-    Acceleration gravity;
-
 
     /* local OpMode members. */
     HardwareMap hwMap           =  null;
-    private ElapsedTime period  = new ElapsedTime();
-
-
-    public double     COUNTS_PER_MOTOR_REV    = 795 ;    // our motor
-
-    public double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // This is < 1.0 if geared UP
-    public double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
-    public double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
-            (WHEEL_DIAMETER_INCHES * 3.1415);
 
     /* Constructor */
     public Robot2019(){
@@ -134,7 +115,8 @@ public class Robot2019
         hwMap = ahwMap;
 
         // the names below represent the names in the configuration file
-        // 'testPaulEncoders'
+        // 'Robot2019'
+
         // Define and Initialize Motors
         leftDrive  = hwMap.get(DcMotor.class, "left_drive");
         rightDrive = hwMap.get(DcMotor.class, "right_drive");
@@ -144,7 +126,6 @@ public class Robot2019
         //Slider Motor
         sliderMotor = hwMap.get(DcMotor.class, "slider_motor");
 
-        //leftArm    = hwMap.get(DcMotor.class, "left_arm");
         leftDrive.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
         leftFrontDrive.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
 
@@ -152,32 +133,10 @@ public class Robot2019
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
 
         // Set all motors to zero power
-        leftDrive.setPower(0);
-        rightDrive.setPower(0);
-        leftFrontDrive.setPower(0);
-        rightFrontDrive.setPower(0);
+        setPower(0);
 
-        //leftArm.setPower(0);
-
-        // Set all motors to run without encoders.
-        // May want to use RUN_USING_ENCODERS if encoders are installed.
-        /*
-        leftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        leftFrontDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightFrontDr ive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        */
         setDriveMode(DcMotor.RunMode.RUN_USING_ENCODER);
         sliderMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        //leftArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        // Define and initialize ALL installed servos.
-        //leftClaw  = hwMap.get(Servo.class, "left_hand");
-        //rightClaw = hwMap.get(Servo.class, "right_hand");
-        //leftClaw.setPosition(MID_SERVO);
-        //rightClaw.setPosition(MID_SERVO);
 
         // Set up the parameters with which we will use our IMU. Note that integration
         // algorithm here just reports accelerations to the logcat log; it doesn't actually
@@ -203,106 +162,125 @@ public class Robot2019
         rearLeftServo = hwMap.get(Servo.class, "RearLeftServo");
         rearRightServo = hwMap.get(Servo.class, "RearRightServo");
 
+        capServo = hwMap.get(Servo.class, "CapServo");
 
     }
+
     //This gets the servo in its starting position
     public void raiseRearServos() {
         rearRightServo.setPosition(0);
         rearLeftServo.setPosition(0.9);
     }
+
     //This gets the servo to its clamped position
     public void lowerRearServos() {
         rearRightServo.setPosition(0.7);
         rearLeftServo.setPosition(0.3);
     }
 
-
-
-
+    // sets power to all chassis motors
     public void setPower(double power){
-            leftDrive.setPower(power);
-            rightDrive.setPower(power);
-            leftFrontDrive.setPower(power);
-            rightFrontDrive.setPower(power);
-        }
+        leftDrive.setPower(power);
+        rightDrive.setPower(power);
+        leftFrontDrive.setPower(power);
+        rightFrontDrive.setPower(power);
+    }
 
-        public void setPower(double leftPower, double rightPower){
-            leftDrive.setPower(leftPower);
-            rightDrive.setPower(rightPower);
-            leftFrontDrive.setPower(leftPower);
-            rightFrontDrive.setPower(rightPower);
-        }
+    // set power to the motors on each side of the chassis indiviually
+    public void setPower(double leftPower, double rightPower){
+        leftDrive.setPower(leftPower);
+        rightDrive.setPower(rightPower);
+        leftFrontDrive.setPower(leftPower);
+        rightFrontDrive.setPower(rightPower);
+    }
 
-        public void setDriveMode(DcMotor.RunMode mode) {
-            leftDrive.setMode(mode);
-            rightDrive.setMode(mode);
+    // set drive mode for all motors in the chassis
+    public void setDriveMode(DcMotor.RunMode mode) {
+        leftDrive.setMode(mode);
+        rightDrive.setMode(mode);
+        leftFrontDrive.setMode(mode);
+        rightFrontDrive.setMode(mode);
+    }
 
-            leftFrontDrive.setMode(mode);
-            rightFrontDrive.setMode(mode);
-        }
+    // set target position for each motor in the chassis
+    public void setTargetPosition(int newLeftTarget, int newRightTarget){
+        leftDrive.setTargetPosition(newLeftTarget);
+        rightDrive.setTargetPosition(newRightTarget);
+        leftFrontDrive.setTargetPosition(newLeftTarget);
+        rightFrontDrive.setTargetPosition(newRightTarget);
+    }
 
-        public void setTargetPosition(int newLeftTarget, int newRightTarget){
-            leftDrive.setTargetPosition(newLeftTarget);
-            rightDrive.setTargetPosition(newRightTarget);
-            leftFrontDrive.setTargetPosition(newLeftTarget);
-            rightFrontDrive.setTargetPosition(newRightTarget);
-        }
+    public void setLeftStrafePower(double power) {
+        setStrafePower(-Math.abs(power));
+    }
 
-        // to strafe, twin drives must be set to opposing powers.
-        // strafeing left or right depends on sign of power
-        public void setStrafePower(double power) {
-            leftDrive.setPower(-power);
-            rightDrive.setPower(power);
+    public void setRightStrafePower(double power) {
+        setStrafePower(Math.abs(power));
+    }
 
-            leftFrontDrive.setPower(power);
-            rightFrontDrive.setPower(-power);
-        }
+    // to strafe, twin drives must be set to opposing powers.
+    // strafeing left or right depends on sign of power
+    public void setStrafePower(double power) {
+        leftDrive.setPower(-power);
+        rightDrive.setPower(power);
+        leftFrontDrive.setPower(power);
+        rightFrontDrive.setPower(-power);
+    }
 
-        public void runMotorTickDistance(int distance, double power, DcMotor motor) {
-            int newTarget = motor.getCurrentPosition();
-            motor.setTargetPosition(newTarget);
-            motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            motor.setPower(Math.abs(power));
-            while (motor.isBusy()) {
-                // let the motor run
-
-            }
-            motor.setPower(0);
-            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        }
-
-        public double getYAxisAngle() {
-
-
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC,
-                        AxesOrder.ZYX,
-                        AngleUnit.DEGREES);
-            return AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle);
-        }
-        //function to brake the robot, set the direction to 1 or -1,
-        //1 for braking after going forward, -1 for backward
-        public void brake(double direction){
-            setPower(-.2*direction);
-            //sleep(10);
-            setPower(0);
-        }
-
-        public void closeClaws(){
-            leftServo.setPosition(openPositionL);
-            rightServo.setPosition(openPositionR);
+    // TBF: remove this?
+    public void runMotorTickDistance(int distance, double power, DcMotor motor) {
+        int newTarget = motor.getCurrentPosition();
+        motor.setTargetPosition(newTarget);
+        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motor.setPower(Math.abs(power));
+        while (motor.isBusy()) {
+            // let the motor run
 
         }
+        motor.setPower(0);
+        motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
 
-        public void straightClaws(){
-            leftServo.setPosition(straightPositionL);
-            rightServo.setPosition(straitPositionR);
+    // get the gyrosenor angle.  Straight ahead is zero.
+    // to the left is positive until 180, then it turns into -180.
+    // to the right is negative, until -180, then it turns into 180.S
+    public double getYAxisAngle() {
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC,
+                    AxesOrder.ZYX,
+                    AngleUnit.DEGREES);
+        return AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle);
+    }
 
-        }
+    //function to brake the robot, set the direction to 1 or -1,
+    //1 for braking after going forward, -1 for backward
+    public void brake(double direction){
+        setPower(-.2*direction);
+        //sleep(10);
+        setPower(0);
+    }
 
-        public void openClaws(){
-            rightServo.setPosition(closedPositionR);
-            leftServo.setPosition(closedPositionL);
-        }
+    public void raiseCap() {
+        capServo.setPosition(raisedPositionCap);
+    }
+    public void dropCap() {
+        capServo.setPosition(dropPositionCap);
+    }
+
+    public void closeClaws(){
+        leftServo.setPosition(openPositionL);
+        rightServo.setPosition(openPositionR);
+
+    }
+
+    public void straightClaws(){
+        leftServo.setPosition(straightPositionL);
+        rightServo.setPosition(straitPositionR);
+    }
+
+    public void openClaws(){
+        rightServo.setPosition(closedPositionR);
+        leftServo.setPosition(closedPositionL);
+    }
 }
 
 
