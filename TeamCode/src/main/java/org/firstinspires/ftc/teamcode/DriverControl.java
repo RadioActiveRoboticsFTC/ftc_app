@@ -203,15 +203,19 @@ public class DriverControl extends LinearOpMode {
             // Display the current value
             telemetry.addData(" Left Servo Position", "%5.2f", leftposition);
             telemetry.addData(">", "Press Stop to end test." );
-
-
-            if (gamepad2.b) {
-                robot.lowerRearServos();
-
-            } else {
-                robot.raiseRearServos();
-
+            if (gamepad2.x) {
+                robot.dropCap();
+            }else{
+                robot.raiseCap();
             }
+
+//            if (gamepad2.b) {
+//                robot.lowerRearServos();
+//
+//            } else {
+//                robot.raiseRearServos();
+//
+//            }
             robot.leftServo.setPosition(leftposition);
             robot.rightServo.setPosition(rightposition);
 
