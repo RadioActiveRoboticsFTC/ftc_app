@@ -413,8 +413,6 @@ public class BaseAutonomous extends LinearOpMode {
         }
 
         robot.setPower(0);
-
-
     }
 
     // this function spins the robot left or right
@@ -499,19 +497,22 @@ public class BaseAutonomous extends LinearOpMode {
         sleep(1000);
         robot.openClaws();
 
-        spinLeftP(0,.8);
+        // spinLeftP(0,.8);
+        spin(!blueSide, 0, .8);
 
         driveStraight(.75, 44,20);
         robot.brake(1);
 
-        spinLeftP(90, .8);
+//        spinLeftP(90, .8);
+        spin(!blueSide, 90, .8);
 
         // 12 is too close to the middle of foundation?
         // 6 barely gets the side
         driveStraight(.75,9, 20);
         robot.brake(1);
 
-        spinLeftP(180, .8);
+//        spinLeftP(180, .8);
+        spin(!blueSide, 180, .8);
 
         // push the foundation into the building zone
         // is too high a power causing it to skid?
