@@ -136,39 +136,8 @@ public class BaseAutonomous extends LinearOpMode {
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
-         /*  //close claws
-        robot.leftServo.setPosition(robot.openPositionL);
-        robot.rightServo.setPosition(robot.openPositionR);
-           */
-        sleep(1000);
-
         runAutoOpMode();
-        // Step through each leg of the path,
-        // Note: Reverse movement is obtained by setting a negative distance (not speed)
-        //encoderDrive(0.4,  12*4,  12*4, 30.0);  // S1: Forward 47 Inches with 5 Sec timeout
-        //driveStraight(0.4, 12*4, 30.0);
-        //sleep(10000);
 
-
-        /*
-        encoderDrive(DRIVE_SPEED,  -48,  -48, 10.0);  // S1: Forward 47 Inches with 5 Sec timeout
-
-
-
-        spinLeft(90, 0.3);
-        //encoderDrive(TURN_SPEED,   12, -12, 8.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
-        sleep(1000);
-
-
-        encoderDrive(DRIVE_SPEED, -24, -24, 8.0);  // S3: Reverse 24 Inches with 4 Sec timeout
-        */
-
-        //robot.leftClaw.setPosition(1.0);            // S4: Stop and close the claw.
-        //robot.rightClaw.setPosition(0.0);
-        sleep(10000);     // pause to read output
-
-        //telemetry.addData("Path", "Complete");
-        //telemetry.update();
     }
 
     // drive straight a certain distance using encoders and IMU
@@ -358,7 +327,7 @@ public class BaseAutonomous extends LinearOpMode {
 
         // IRELEVENT angles to the left are positive, to the right negative
         // makes it so whatever the user inputs will be positive
-        toAngle = Math.abs(toAngle);
+//        toAngle = Math.abs(toAngle);
         // this code turns left
         double yAxisAngle;
         yAxisAngle = robot.getYAxisAngle();
@@ -380,23 +349,25 @@ public class BaseAutonomous extends LinearOpMode {
             // proportional power
             double percentAngularDistance = (toAngle-yAxisAngle)/totalAngularDistance;
             double proportionalPower = percentAngularDistance * power;
-            proportionalPower = Range.clip(proportionalPower, .1, power);
+            proportionalPower = Range.clip(proportionalPower, .05, power);
 
             if (yAxisAngle >= toAngle) turning = false;
 
             telemetry.addData("yAxis", yAxisAngle);
             telemetry.addData("turning:", turning);
+            telemetry.addData("pPower", proportionalPower);
             telemetry.update();
 
             if (turning) {
                 // spin left
-                robot.setPower(-power, power);
+                robot.setPower(-proportionalPower, proportionalPower);
             }
         }
 
         //Brake
-        robot.setPower(power,-power);
-        sleep(10);
+        //robot.setPower(power,-power);
+//        robot.setPower(.05, -0.5);
+//        sleep(10);
         robot.setPower(0);
 
 
@@ -405,8 +376,8 @@ public class BaseAutonomous extends LinearOpMode {
     public void spinRightP (double toAngle, double power) {
 
         // makes it so whatever the user inputs the value returned will be negitive
-        toAngle = Math.abs(toAngle);
-        toAngle = toAngle*-1;
+//        toAngle = Math.abs(toAngle);
+//        toAngle = toAngle*-1;
 
         // this code turns left
         double yAxisAngle;
@@ -421,16 +392,17 @@ public class BaseAutonomous extends LinearOpMode {
             //angles = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             //yAxisAngle = AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle);
 
-            //yAxisAngle = robot.getYAxisAngle();
+            yAxisAngle = robot.getYAxisAngle();
 
             // proportional power
             double percentAngularDistance = (toAngle-yAxisAngle)/totalAngularDistance;
             double proportionalPower = percentAngularDistance * power;
-            proportionalPower = Range.clip(proportionalPower, .1, power);
+            proportionalPower = Range.clip(proportionalPower, .05, power);
 
             if (yAxisAngle <= toAngle) turning = false;
 
             telemetry.addData("yAxis", yAxisAngle);
+            telemetry.addData("pPower", proportionalPower);
             telemetry.addData("turning:", turning);
             telemetry.update();
 
@@ -443,6 +415,15 @@ public class BaseAutonomous extends LinearOpMode {
         robot.setPower(0);
 
 
+    }
+
+    // this function spins the robot left or right
+    void spin(boolean spinRight, double toAngle, double power) {
+        if (spinRight) {
+            spinRightP(toAngle, power);
+        } else {
+            spinLeftP(toAngle, power);
+        }
     }
 
     // this program moves the foundation into the building zone,
@@ -459,6 +440,114 @@ public class BaseAutonomous extends LinearOpMode {
         // move up to the foundation so that we are positioned
         // to drop our claws on top of it
 
+        /*
+        // the purpose of this next group of code is to start
+        // in a legal position, but then end in the middle of the foundation
+
+        driveStraight(straightSpeed,dist/3,20);
+        robot.brake(1);
+
+        spinLeftP(45,0.8);
+
+        driveStraight(straightSpeed,(dist/3)+5,20);
+        robot.brake(1);
+
+        spinRightP(0,0.8);
+
+        driveStraight(straightSpeed,dist/3 ,20);
+        robot.brake(1);
+        */
+        driveStraight(straightSpeed,dist ,20);
+
+
+        // close claws so that they will drop down on top of the foundation
+        robot.straightClaws();
+
+        sleep(500);
+
+        // go backwards so that the grooves catch on the foundation edge,
+        // and we can start dragging the foundation towards the building site.
+        driveStraight(0.2,-(dist - 4),20 );
+
+        // this part of the code unattaches the robot from the
+        // foundation by lifting linear slider, and opening claws,
+        // and letting go of slider
+        robot.sliderMotor.setPower(0.5);
+        sleep(700);
+        robot.openClaws();
+
+        //drop linear slider
+        robot.sliderMotor.setPower(0);
+
+        // now we need to get to the other side of the side of the foundation,
+        // so we can push it further into the building zone
+        /*
+        if (blueSide) {
+            spinRightP(-90, .8);
+        } else {
+            spinLeftP(-90, .8);
+        }
+        */
+        spin(blueSide, -90, .8);
+
+        driveStraight(.5,28,10);
+        robot.brake(1);
+
+        //make sure the linear slider is all the way down
+        // so that we don't drive OVER the foundation
+        robot.closeClaws();
+        sleep(1000);
+        robot.openClaws();
+
+        spinLeftP(0,.8);
+
+        driveStraight(.75, 44,20);
+        robot.brake(1);
+
+        spinLeftP(90, .8);
+
+        // 12 is too close to the middle of foundation?
+        // 6 barely gets the side
+        driveStraight(.75,9, 20);
+        robot.brake(1);
+
+        spinLeftP(180, .8);
+
+        // push the foundation into the building zone
+        // is too high a power causing it to skid?
+
+        driveStraight(.2,50, 20);
+
+        // get ourselves to a known orientation
+        /*
+        double yAngle = robot.getYAxisAngle();
+        double targetAngle = 165.0;
+        if (yAngle < targetAngle) {
+            spinLeftP(targetAngle, .5);
+        } else {
+            spinRightP(targetAngle, .5);
+        }
+        */
+
+        /*
+        robot.setStrafePower(-.5);
+        sleep(1000);
+        robot.setPower(0);
+        */
+
+    }
+
+    void moveFoundationSimple(boolean blueSide) {
+        double straightSpeed = .5;
+        double turnSpeed = .3;
+        // in theory, we know how far we need to go,
+        // but in practice we are off by 'offset'
+        double offset = 2.0;
+        double dist = (4 * 12) - 18 - offset;
+
+        // move up to the foundation so that we are positioned
+        // to drop our claws on top of it
+
         //robot.setStrafePower(-.3);
         //sleep(500);
         //robot.setPower(0);
@@ -469,17 +558,17 @@ public class BaseAutonomous extends LinearOpMode {
 
         // the purpose of this next group of code is to start
         // in a legal position, but then end in the middle of the foundation
-        driveStraight(straightSpeed,dist/3,20);
+        driveStraight(straightSpeed, dist / 3, 20);
         robot.brake(1);
 
-        spinLeft(45,0.1);
+        spinLeftP(45, 0.5);
 
-        driveStraight(straightSpeed,(dist/3)+5,20);
+        driveStraight(straightSpeed, (dist / 3) + 5, 20);
         robot.brake(1);
 
-        spinRight(4,0.1);
+        spinRight(40, 0.5);
 
-        driveStraight(straightSpeed,dist/3 ,20);
+        driveStraight(straightSpeed, dist / 3, 20);
         robot.brake(1);
 
         // close claws so that they will drop down on top of the foundation
@@ -489,7 +578,7 @@ public class BaseAutonomous extends LinearOpMode {
 
         // go backwards so that the grooves catch on the foundation edge,
         // and we can start dragging the foundation towards the building site.
-        driveStraight(0.1,-(dist - 4),20 );
+        driveStraight(0.1, -(dist - 1), 20);
 
         // this part of the code unattaches the robot from the
         // foundation by lifting linear slider, and opening claws,
@@ -500,33 +589,5 @@ public class BaseAutonomous extends LinearOpMode {
 
         //drop linear slider
         robot.sliderMotor.setPower(0);
-
-        // now we need to get to the other side of the side of the foundation,
-        // so we can push it further into the building zone
-        spinRight(-90,.1);
-        driveStraight(.2,28,10);
-        //make sure the linear slider is all the way down
-        // so that we don't drive OVER the foundation
-        robot.closeClaws();
-        sleep(1000);
-        robot.openClaws();
-
-        spinLeft(0,.1);
-
-        driveStraight(.75, 44,20);
-        robot.brake(1);
-        spinLeft(90, turnSpeed);
-        driveStraight(.75,12, 20);
-        robot.brake(1);
-        spinLeft(180, .1);
-
-        // push the foundation into the building zone
-        driveStraight(.75,50, 20);
-        /*
-        robot.setStrafePower(-.5);
-        sleep(1000);
-        robot.setPower(0);
-        */
-
     }
 }
