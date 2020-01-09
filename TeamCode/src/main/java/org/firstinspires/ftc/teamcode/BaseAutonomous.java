@@ -145,6 +145,11 @@ public class BaseAutonomous extends LinearOpMode {
         encoderDrive(power, inches, inches, timoutSecs);
     }
 
+    // by default, use proportional correction from gyrosensor to keep robot straight
+    public void encoderDrive(double power, double leftInches, double rightInches, double timeoutS) {
+        encoderDrive(power, leftInches, rightInches, timeoutS, true);
+    }
+
     /*
      *  Method to perfmorm a relative move, based on encoder counts.
      *  Encoders are not reset as the move is based on the current position.
@@ -155,7 +160,8 @@ public class BaseAutonomous extends LinearOpMode {
      */
     public void encoderDrive(double power,
                              double leftInches, double rightInches,
-                             double timeoutS) {
+                             double timeoutS,
+                             boolean propStraight) {
         int newLeftTarget;
         int newRightTarget;
         double yAxis;
@@ -200,7 +206,12 @@ public class BaseAutonomous extends LinearOpMode {
                    (runtime.seconds() < timeoutS) &&
                    (robot.leftDrive.isBusy() && robot.rightDrive.isBusy())) {
 
-                if (goingStraight) {
+                // initialize proportional power correction
+                powerCorrection = 0.0;
+
+                // calculate this proportional power correction only if we're
+                // going straight and we WANT to correct for angle errors
+                if (goingStraight && propStraight) {
                     // what is our error?  How far off are we from our target angle?
                     yAxis = robot.getYAxisAngle();
                     angleError = yAxis - targetYangle;
@@ -213,8 +224,6 @@ public class BaseAutonomous extends LinearOpMode {
                     // are we going in reverse? if so, swap what we do
                     if (leftInches < 0.0) powerCorrection = -powerCorrection;
 
-                    robot.setPower(power + powerCorrection, power - powerCorrection);
-
                     telemetry.addData("Power Correction", powerCorrection);
 
                     numCorrections += 1;
@@ -222,6 +231,8 @@ public class BaseAutonomous extends LinearOpMode {
                     avgPowerCorrection += Math.abs(powerCorrection);
 
                 }
+
+                robot.setPower(power + powerCorrection, power - powerCorrection);
 
                 telemetry.addData("avg angle error", avgAngleError/numCorrections);
                 telemetry.addData("avg pwr corr", avgPowerCorrection/numCorrections);
@@ -516,8 +527,9 @@ public class BaseAutonomous extends LinearOpMode {
 
         // push the foundation into the building zone
         // is too high a power causing it to skid?
-
-        driveStraight(.2,50, 20);
+        // is it risky to use the gyrosensor, when we are at the 180/-180 angle boundary?
+//        driveStraight(.2,50, 20);
+        encoderDrive(.2, 20, 20, 10, false);
 
         // get ourselves to a known orientation
         /*
