@@ -342,6 +342,8 @@ public class BaseAutonomous extends LinearOpMode {
         // this code turns left
         double yAxisAngle;
         yAxisAngle = robot.getYAxisAngle();
+
+        // how far are we trying to go?
         double totalAngularDistance = toAngle-yAxisAngle;
         boolean turning = true;
         double prevAngle = robot.getYAxisAngle();
@@ -354,6 +356,8 @@ public class BaseAutonomous extends LinearOpMode {
             //yAxisAngle = AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle);
 
             yAxisAngle = robot.getYAxisAngle();
+
+            // watch for the 180/-180 border
             if (yAxisAngle < 0 && prevAngle > 0) turning = false;
             prevAngle = yAxisAngle;
 
@@ -397,6 +401,9 @@ public class BaseAutonomous extends LinearOpMode {
 //        double turnAngle = 45.0;
 //        double power = 0.2;
         double totalAngularDistance = toAngle-yAxisAngle;
+
+        double prevAngle = robot.getYAxisAngle();
+
         // Loop and update the dashboard
         while (opModeIsActive() && turning) {
             // what angle are we at right now?
@@ -404,6 +411,10 @@ public class BaseAutonomous extends LinearOpMode {
             //yAxisAngle = AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle);
 
             yAxisAngle = robot.getYAxisAngle();
+
+            // watch for the border
+            if (yAxisAngle > 0 && prevAngle < 0) turning = false;
+            prevAngle = yAxisAngle;
 
             // proportional power
             double percentAngularDistance = (toAngle-yAxisAngle)/totalAngularDistance;
@@ -529,7 +540,7 @@ public class BaseAutonomous extends LinearOpMode {
         // is too high a power causing it to skid?
         // is it risky to use the gyrosensor, when we are at the 180/-180 angle boundary?
 //        driveStraight(.2,50, 20);
-        encoderDrive(.2, 20, 20, 10, false);
+        encoderDrive(.2, 50, 50, 10, false);
 
         // get ourselves to a known orientation
         /*
