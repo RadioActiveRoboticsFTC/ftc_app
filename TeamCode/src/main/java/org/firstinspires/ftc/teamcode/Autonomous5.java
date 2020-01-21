@@ -32,24 +32,24 @@ public class Autonomous5 extends BaseAutonomous {
         // move up to the foundation so that we are positioned
         // to drop our claws on top of it
 
-        /*
+
         // the purpose of this next group of code is to start
         // in a legal position, but then end in the middle of the foundation
 
         driveStraight(straightSpeed,dist/3,20);
         robot.brake(1);
 
-        spinLeftP(45,0.8);
+        spinRightP(-45,0.8);
 
         driveStraight(straightSpeed,(dist/3)+5,20);
         robot.brake(1);
 
-        spinRightP(0,0.8);
+        spinLeftP(0,0.8);
 
         driveStraight(straightSpeed,dist/3 ,20);
         robot.brake(1);
-        */
-        driveStraight(straightSpeed,dist ,20);
+
+        //driveStraight(straightSpeed,dist ,20);
 
 
         // close claws so that they will drop down on top of the foundation
@@ -113,7 +113,8 @@ public class Autonomous5 extends BaseAutonomous {
         // is too high a power causing it to skid?
         // is it risky to use the gyrosensor, when we are at the 180/-180 angle boundary?
 //        driveStraight(.2,50, 20);
-        encoderDrive(.2, 50, 50, 10, false);
+        //encreased to .3
+        encoderDrive(.3, 50, 50, 10, false);
 
         // get ourselves to a known orientation
         /*
@@ -133,9 +134,9 @@ public class Autonomous5 extends BaseAutonomous {
         */
 
         // park!
-        robot.setStrafePower(-.5);
+        robot.setStrafePower(-.7);
         sleep(400);
-        robot.setStrafePower(.5);
+        robot.setStrafePower(.7);
         sleep(1200);
         robot.setPower(0);
 
