@@ -182,6 +182,7 @@ public class DriverControl extends LinearOpMode {
             }
             telemetry.addData("left trigger value", leftTriggerValue);
 
+
             //open and close the claws of the servo independetly
             if (leftTriggerValue < robot.triggerDownL) {
                 leftposition = robot.closedPositionL;
@@ -199,6 +200,12 @@ public class DriverControl extends LinearOpMode {
 
             if (rightTriggerValue == robot.triggerDownR){
                 rightposition = robot.openPositionR;
+            }
+            if (gamepad2.y == true){
+                leftposition = robot.straightPositionL;
+            }
+            if (gamepad2.y == true){
+                rightposition = robot.straitPositionR;
             }
             // Display the current value
             telemetry.addData(" Left Servo Position", "%5.2f", leftposition);
