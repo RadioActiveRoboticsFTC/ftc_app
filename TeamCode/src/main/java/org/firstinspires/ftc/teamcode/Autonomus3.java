@@ -14,7 +14,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 // This is an example of creating an autonomous mode based off of
 // BaseAutonomous (we 'extend' it)
 
-@Autonomous(name="AutonomousRight2 ")
+@Autonomous(name="AutonomousRight2")
 public class Autonomus3 extends BaseAutonomous {
 
     // The BaseAutonomous class will have it's runOpsMode function called.  It will set up
