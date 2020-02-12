@@ -32,6 +32,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -65,6 +66,7 @@ public class Robot2019
 
     //Linear slider motor
     public DcMotor sliderMotor = null;
+    public DcMotor sliderMotor2 = null;
 
     // these are the servos for the claw
     public Servo leftServo    = null;
@@ -81,12 +83,12 @@ public class Robot2019
     float raisedPositionCap = (float) 0.3;
     float dropPositionCap = (float)   0.57;
 
-    float closedPositionL = (float) .8;
+    float closedPositionL = (float) .71;
     float straightPositionL = (float) .52;
     float openPositionL = (float) .475;
     float triggerDownL = (float) 1.0;
 
-    float closedPositionR = (float) .4;
+    float closedPositionR = (float) .47;
     float openPositionR = (float) .75;
     float straitPositionR = (float) .67;
 
@@ -125,6 +127,9 @@ public class Robot2019
 
         //Slider Motor
         sliderMotor = hwMap.get(DcMotor.class, "slider_motor");
+        sliderMotor2 = hwMap.get(DcMotor.class, "slider_motor2");
+        sliderMotor.setDirection(DcMotor.Direction.REVERSE);
+        sliderMotor2.setDirection(DcMotor.Direction.FORWARD);
 
         leftDrive.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
         leftFrontDrive.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
@@ -137,6 +142,7 @@ public class Robot2019
 
         setDriveMode(DcMotor.RunMode.RUN_USING_ENCODER);
         sliderMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        sliderMotor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Set up the parameters with which we will use our IMU. Note that integration
         // algorithm here just reports accelerations to the logcat log; it doesn't actually
@@ -269,6 +275,8 @@ public class Robot2019
     public void closeClaws(){
         leftServo.setPosition(openPositionL);
         rightServo.setPosition(openPositionR);
+
+
 
     }
 

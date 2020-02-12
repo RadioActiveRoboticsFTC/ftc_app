@@ -84,8 +84,9 @@ public class DriverControl extends LinearOpMode {
         double leftposition = 0.0;
         //Get the initial value of our slider motor position
         double sliderStart = robot.sliderMotor.getCurrentPosition();
+        double sliderStart2 = robot.sliderMotor2.getCurrentPosition();
         boolean previousSliderBad = false;
-
+        boolean previousSliderBad2 = false;
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
@@ -154,9 +155,12 @@ public class DriverControl extends LinearOpMode {
             // code for linear slider
             double yAxis = gamepad2.left_stick_y;
             boolean aPressed =   gamepad2.a;
-            double sliderPos = robot.sliderMotor.getCurrentPosition();
-            telemetry.addData("Slider Pos", sliderPos);
 
+            double sliderPos = robot.sliderMotor.getCurrentPosition();
+            double sliderPos2 = robot.sliderMotor2.getCurrentPosition();
+            telemetry.addData("Slider Pos", sliderPos);
+            telemetry.addData("Slider 1 dist", sliderPos - sliderStart);
+            telemetry.addData("Slider 2 dist", sliderPos2 - sliderStart2);
             // This is false if the linear slider is within the proper range
             boolean isSliderBad = sliderPos > sliderStart+40;
             if(isSliderBad == false && previousSliderBad == true){
@@ -177,9 +181,36 @@ public class DriverControl extends LinearOpMode {
                 }
 
                 if (yAxis >= 0 && !aPressed) {
-                    robot.sliderMotor.setPower(yAxis / 4);
+                    robot.sliderMotor.setPower(yAxis / 2);
                 }
             }
+
+            boolean isSliderBad2 = sliderPos2 > sliderStart2+40;
+            if(isSliderBad2 == false && previousSliderBad2 == true){
+                robot.sliderMotor2.setPower(0);
+            }
+            previousSliderBad2 = isSliderBad2;
+            if(isSliderBad2){
+                robot.sliderMotor2.setPower(-0.7);
+            }
+            else {
+                //transition moving up state
+                if (yAxis < 0) {
+                    robot.sliderMotor2.setPower(yAxis);
+                }
+                //transition to stall state, change power value TBF
+                if (aPressed) {
+                    robot.sliderMotor2.setPower(-0.5);
+                }
+
+                if (yAxis >= 0 && !aPressed) {
+                    robot.sliderMotor2.setPower(yAxis / 2 );
+                }
+            }
+
+
+            //robot.sliderMotor.setPower(-gamepad2.left_stick_y);
+            //robot.sliderMotor2.setPower(gamepad2.left_stick_y);
             telemetry.addData("left trigger value", leftTriggerValue);
 
 
