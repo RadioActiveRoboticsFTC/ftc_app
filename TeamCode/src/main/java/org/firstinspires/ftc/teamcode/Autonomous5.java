@@ -64,12 +64,14 @@ public class Autonomous5 extends BaseAutonomous {
         // this part of the code unattaches the robot from the
         // foundation by lifting linear slider, and opening claws,
         // and letting go of slider
-        robot.sliderMotor.setPower(0.5);
-        sleep(700);
+//        robot.setLinearMotorPower(0.5);
+//        sleep(700);
+        robot.setLinearMotorPower(0.8);
+        sleep(2000);
         robot.openClaws();
 
         //drop linear slider
-        robot.sliderMotor.setPower(0);
+        robot.setLinearMotorPower(0);
 
         // now we need to get to the other side of the side of the foundation,
         // so we can push it further into the building zone
