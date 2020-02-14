@@ -173,7 +173,13 @@ public class DriverControl extends LinearOpMode {
             else {
                 //transition moving up state
                 if (yAxis < 0) {
-                    robot.sliderMotor.setPower(yAxis);
+
+                    if(gamepad2.right_bumper == true){
+                      robot.sliderMotor.setPower(yAxis/2);
+                    }
+                    else {
+                        robot.sliderMotor.setPower(yAxis);
+                    }
                 }
                 //transition to stall state, change power value TBF
                 if (aPressed) {
@@ -196,7 +202,13 @@ public class DriverControl extends LinearOpMode {
             else {
                 //transition moving up state
                 if (yAxis < 0) {
-                    robot.sliderMotor2.setPower(yAxis);
+
+                    if(gamepad2.right_bumper == true){
+                        robot.sliderMotor2.setPower(yAxis/2);
+                    }
+                    else {
+                        robot.sliderMotor2.setPower(yAxis);
+                    }
                 }
                 //transition to stall state, change power value TBF
                 if (aPressed) {
@@ -261,7 +273,7 @@ public class DriverControl extends LinearOpMode {
 
             //sleep(CYCLE_MS);
             idle();
-            
+
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
