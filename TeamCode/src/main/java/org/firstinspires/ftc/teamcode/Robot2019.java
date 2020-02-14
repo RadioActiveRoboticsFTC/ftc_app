@@ -80,8 +80,8 @@ public class Robot2019
     /*
     This section is for the hardcoded positions of the various servos
      */
-    float raisedPositionCap = (float) 0.3;
-    float dropPositionCap = (float)   0.57;
+    float raisedPositionCap = (float) 0.44;
+    float dropPositionCap = (float)   0.69;
 
     float closedPositionL = (float) .71;
     float straightPositionL = (float) .52;
@@ -289,6 +289,15 @@ public class Robot2019
         rightServo.setPosition(closedPositionR);
         leftServo.setPosition(closedPositionL);
     }
+
+    public void setLinearMotorPower(double power){
+     sliderMotor.setPower(power);
+     sliderMotor2.setPower(power);
+    }
+
+
+
+
 }
 
 
