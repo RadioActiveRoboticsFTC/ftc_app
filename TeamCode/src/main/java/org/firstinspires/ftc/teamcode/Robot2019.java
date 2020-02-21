@@ -65,8 +65,8 @@ public class Robot2019
     public DcMotor rightFrontDrive  = null;
 
     //Linear slider motor
-    public DcMotor sliderMotor = null;
-    public DcMotor sliderMotor2 = null;
+    public DcMotor leftSliderMotor = null;
+    public DcMotor rightSliderMotor = null;
 
     // these are the servos for the claw
     public Servo leftServo    = null;
@@ -126,10 +126,10 @@ public class Robot2019
         rightFrontDrive = hwMap.get(DcMotor.class, "right_front_drive");
 
         //Slider Motor
-        sliderMotor = hwMap.get(DcMotor.class, "slider_motor");
-        sliderMotor2 = hwMap.get(DcMotor.class, "slider_motor2");
-        sliderMotor.setDirection(DcMotor.Direction.REVERSE);
-        sliderMotor2.setDirection(DcMotor.Direction.FORWARD);
+        leftSliderMotor = hwMap.get(DcMotor.class, "slider_motor");
+        rightSliderMotor = hwMap.get(DcMotor.class, "slider_motor2");
+        leftSliderMotor.setDirection(DcMotor.Direction.REVERSE);
+        rightSliderMotor.setDirection(DcMotor.Direction.FORWARD);
 
         leftDrive.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
         leftFrontDrive.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
@@ -141,8 +141,8 @@ public class Robot2019
         setPower(0);
 
         setDriveMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        sliderMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        sliderMotor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftSliderMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightSliderMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Set up the parameters with which we will use our IMU. Note that integration
         // algorithm here just reports accelerations to the logcat log; it doesn't actually
@@ -291,8 +291,8 @@ public class Robot2019
     }
 
     public void setLinearMotorPower(double power){
-     sliderMotor.setPower(power);
-     sliderMotor2.setPower(power);
+     leftSliderMotor.setPower(power);
+     rightSliderMotor.setPower(power);
     }
 
 
