@@ -440,7 +440,7 @@ public class BaseAutonomous extends LinearOpMode {
     // this function spins the robot left or right
     void spin(boolean spinRight, double toAngle, double power) {
         if (spinRight) {
-            spinRightP(toAngle, power);
+            spinRightP(-toAngle, power);
         } else {
             spinLeftP(toAngle, power);
         }
@@ -460,24 +460,26 @@ public class BaseAutonomous extends LinearOpMode {
         // move up to the foundation so that we are positioned
         // to drop our claws on top of it
 
-        /*
+
         // the purpose of this next group of code is to start
         // in a legal position, but then end in the middle of the foundation
 
         driveStraight(straightSpeed,dist/3,20);
         robot.brake(1);
 
-        spinLeftP(45,0.8);
+//        spinLeftP(45,0.8);
+         spin(blueSide,45,0.8);
 
         driveStraight(straightSpeed,(dist/3)+5,20);
         robot.brake(1);
 
-        spinRightP(0,0.8);
+//        spinRightP(0,0.8);
+        spin(!blueSide,0,0.8);
 
         driveStraight(straightSpeed,dist/3 ,20);
         robot.brake(1);
-        */
-        driveStraight(straightSpeed,dist ,20);
+
+//        driveStraight(straightSpeed,dist ,20);
 
 
         // close claws so that they will drop down on top of the foundation
@@ -492,8 +494,8 @@ public class BaseAutonomous extends LinearOpMode {
         // this part of the code unattaches the robot from the
         // foundation by lifting linear slider, and opening claws,
         // and letting go of slider
-        robot.setLinearMotorPower(0.5);
-        sleep(700);
+        robot.setLinearMotorPower(-1.0);
+        sleep(1000);
         robot.openClaws();
 
         //drop linear slider
@@ -501,32 +503,26 @@ public class BaseAutonomous extends LinearOpMode {
 
         // now we need to get to the other side of the side of the foundation,
         // so we can push it further into the building zone
-        /*
-        if (blueSide) {
-            spinRightP(-90, .8);
-        } else {
-            spinLeftP(-90, .8);
-        }
-        */
-        spin(blueSide, -90, .8);
+
+        spin(!blueSide, 90, .8);
 
         driveStraight(.5,28,10);
         robot.brake(1);
 
         //make sure the linear slider is all the way down
         // so that we don't drive OVER the foundation
-        robot.closeClaws();
-        sleep(1000);
-        robot.openClaws();
+        //robot.closeClaws();
+        //sleep(1000);
+        //robot.openClaws();
 
         // spinLeftP(0,.8);
-        spin(!blueSide, 0, .8);
+        spin(blueSide, 0, .8);
 
         driveStraight(.75, 44,20);
         robot.brake(1);
 
 //        spinLeftP(90, .8);
-        spin(!blueSide, 90, .8);
+        spin(blueSide, 90, .8);
 
         // 12 is too close to the middle of foundation?
         // 6 barely gets the side
@@ -534,30 +530,30 @@ public class BaseAutonomous extends LinearOpMode {
         robot.brake(1);
 
 //        spinLeftP(180, .8);
-        spin(!blueSide, 180, .8);
+        spin(blueSide, 180, .8);
 
         // push the foundation into the building zone
         // is too high a power causing it to skid?
         // is it risky to use the gyrosensor, when we are at the 180/-180 angle boundary?
 //        driveStraight(.2,50, 20);
-        encoderDrive(.2, 50, 50, 10, false);
+        encoderDrive(.3, 50, 50, 10, false);
 
-        // get ourselves to a known orientation
-        /*
-        double yAngle = robot.getYAxisAngle();
-        double targetAngle = 165.0;
-        if (yAngle < targetAngle) {
-            spinLeftP(targetAngle, .5);
+        //park robot
+        double dir;
+        if(blueSide){
+            dir=-1.0;
+
         } else {
-            spinRightP(targetAngle, .5);
+            dir=1.0;
         }
-        */
 
-        /*
-        robot.setStrafePower(-.5);
-        sleep(1000);
+        robot.setStrafePower(.7 * dir);
+        sleep(400);
+
+        robot.setStrafePower(-.7*dir);
+        sleep(1200);
         robot.setPower(0);
-        */
+
 
     }
 
