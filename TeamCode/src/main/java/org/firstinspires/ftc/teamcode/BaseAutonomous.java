@@ -41,32 +41,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
-/**
- * This file illustrates the concept of driving a path based on encoder counts.
- * It uses the common Pushbot hardware class to define the drive on the robot.
- * The code is structured as a LinearOpMode
- *
- * The code REQUIRES that you DO have encoders on the wheels,
- *   otherwise you would use: PushbotAutoDriveByTime;
- *
- *  This code ALSO requires that the drive Motors have been configured such that a positive
- *  power command moves them forwards, and causes the encoders to count UP.
- *
- *   The desired path in this example is:
- *   - Drive forward for 48 inches
- *   - Spin right for 12 Inches
- *   - Drive Backwards for 24 inches
- *   - Stop and close the claw.
- *
- *  The code is written using a method called: encoderDrive(speed, leftInches, rightInches, timeoutS)
- *  that performs the actual movement.
- *  This methods assumes that each movement is relative to the last stopping place.
- *  There are other ways to perform encoder based moves, but this method is probably the simplest.
- *  This code uses the RUN_TO_POSITION mode to enable the Motor controllers to generate the run profile
- *
- * Use Android Studios to Copy this Class, and Paste it into your team's code folder with a new name.
- * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
- */
+// This is the parent class for all autonomouse classes.  It contains all
+// the basic functions we need for navigating using encoders and the IMU
 
 @Autonomous(name="Our Drive By Encoder", group="Pushbot")
 //@Disabled
@@ -76,25 +52,18 @@ public class BaseAutonomous extends LinearOpMode {
     Robot2019              robot   = new Robot2019();   // Use a Pushbot's hardware
     private ElapsedTime runtime = new ElapsedTime();
 
+    // Constants used for calculating encoder distance from linear distance
     //static final double     COUNTS_PER_MOTOR_REV    = 1440 ;    // eg: TETRIX Motor Encoder
-    // gets us 45 of 48 inches
-    //static final double     COUNTS_PER_MOTOR_REV    = 765 ;    // our motor
-    // 46 of 48
-    //static final double     COUNTS_PER_MOTOR_REV    = 775 ;    // our motor
-    // 47 of 48
-    //static final double     COUNTS_PER_MOTOR_REV    = 785 ;    // our motor
     static final double     COUNTS_PER_MOTOR_REV    = 795 ;    // our motor
 
     static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // This is < 1.0 if geared UP
     static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
                                                       (WHEEL_DIAMETER_INCHES * 3.1415);
-    //static final double     DRIVE_SPEED             = 0.4; //0.6;
-    //static final double     TURN_SPEED              = 0.4; //0.5;
+
 
     // State used for updating telemetry
     Orientation angles;
-    //Acceleration gravity;
 
     // For this base class, we do nothing
     public void runAutoOpMode() {
@@ -105,25 +74,18 @@ public class BaseAutonomous extends LinearOpMode {
     @Override
     public void runOpMode() {
 
-        /*
-         * Initialize the drive system variables.
-         * The init() method of the hardware class does all the work here
-         */
+        // Here we place all the things we want to happen at the begining
+        // of every autonomous run
+
+        // Initialize the drive system variables.
         robot.init(hardwareMap);
 
         // Send telemetry message to signify robot waiting;
         telemetry.addData("Status", "Resetting Encoders");    //
         telemetry.update();
 
+        // get ready to use motor encoders
         robot.setDriveMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        /*
-        robot.leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        robot.leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        */
-
         robot.setDriveMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
 
@@ -136,6 +98,8 @@ public class BaseAutonomous extends LinearOpMode {
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
+        // Call the function that child classes will override in order
+        // to do something different for each autonomous mode
         runAutoOpMode();
 
     }
@@ -152,6 +116,7 @@ public class BaseAutonomous extends LinearOpMode {
 
     /*
      *  Method to perfmorm a relative move, based on encoder counts.
+     *  This code is based off the example code.
      *  Encoders are not reset as the move is based on the current position.
      *  Move will stop if any of three conditions occur:
      *  1) Move gets to the desired position
@@ -177,12 +142,15 @@ public class BaseAutonomous extends LinearOpMode {
         double avgPowerCorrection = 0.0;
         int numCorrections = 0;
 
+        // we are trying to go straight if the wheels were told to go
+        // the same distance
         boolean goingStraight = leftInches == rightInches;
 
         // Ensure that the opmode is still active
         if (opModeIsActive()) {
 
-            // Determine new target position, and pass to motor controller
+            // Determine new target position, and pass to motor controller.
+            // Here we convert from the desired linear distance to travel to motor encoders
             newLeftTarget = robot.leftDrive.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
             newRightTarget = robot.rightDrive.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
 
@@ -200,8 +168,6 @@ public class BaseAutonomous extends LinearOpMode {
             // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
             // its target position, the motion will stop.  This is "safer" in the event that the robot will
             // always end the motion as soon as possible.
-            // However, if you require that BOTH motors have finished their moves before the robot continues
-            // onto the next step, use (isBusy() || isBusy()) in the loop test.
             while (opModeIsActive() &&
                    (runtime.seconds() < timeoutS) &&
                    (robot.leftDrive.isBusy() && robot.rightDrive.isBusy())) {
@@ -232,6 +198,8 @@ public class BaseAutonomous extends LinearOpMode {
 
                 }
 
+                // actually move the robot now by powering the robot, taking the
+                // corrections from the gyro sensor into account
                 robot.setPower(power + powerCorrection, power - powerCorrection);
 
                 telemetry.addData("avg angle error", avgAngleError/numCorrections);
@@ -255,28 +223,22 @@ public class BaseAutonomous extends LinearOpMode {
         }
     }
 
+    // This function spins the robot to the left, up to the specified angle using the IMU
     public void spinLeft(double toAngle, double power) {
-
-        // IRELEVENT angles to the left are positive, to the right negative
-        // makes it so whatever the user inputs will be positive
-//        toAngle = Math.abs(toAngle);
 
         // this code turns left
         double yAxisAngle;
         boolean turning = true;
         double prevAngle = robot.getYAxisAngle();
-        //boolean posAngle = yAxisAngle > 0;
 
         // Loop and update the dashboard
         while (opModeIsActive() && turning) {
-            // what angle are we at right now?
-            //angles = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            //yAxisAngle = AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle);
-
+            // what angle are we at right now
             yAxisAngle = robot.getYAxisAngle();
             if (yAxisAngle < 0 && prevAngle > 0) turning = false;
             prevAngle = yAxisAngle;
 
+            // have we spun far enough yet?
             if (yAxisAngle >= toAngle) turning = false;
 
             telemetry.addData("yAxis", yAxisAngle);
@@ -297,24 +259,17 @@ public class BaseAutonomous extends LinearOpMode {
 
     }
 
+    // This function spins the robot to the left, up to the specified angle using the IMU
+    // TBF: can we combine this function with spinLeft into one?
     public void spinRight(double toAngle, double power) {
-
-        // makes it so whatever the user inputs the value returned will be negitive
-//        toAngle = Math.abs(toAngle);
-//        toAngle = toAngle*-1;
 
         // this code turns left
         double yAxisAngle;
         boolean turning = true;
-//        double turnAngle = 45.0;
-//        double power = 0.2;
 
         // Loop and update the dashboard
         while (opModeIsActive() && turning) {
             // what angle are we at right now?
-            //angles = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            //yAxisAngle = AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle);
-
             yAxisAngle = robot.getYAxisAngle();
 
             if (yAxisAngle <= toAngle) turning = false;
@@ -329,17 +284,16 @@ public class BaseAutonomous extends LinearOpMode {
             }
         }
 
+        //Brake
+        robot.setPower(power,-power);
+        sleep(10);
         robot.setPower(0);
-
-
     }
 
+    // This function is just like spinLeft, but sets the power proportional to the distance
+    // from our target angle; this way we don't have to brake at the end.
     public void spinLeftP(double toAngle, double power) {
 
-        // IRELEVENT angles to the left are positive, to the right negative
-        // makes it so whatever the user inputs will be positive
-//        toAngle = Math.abs(toAngle);
-        // this code turns left
         double yAxisAngle;
         yAxisAngle = robot.getYAxisAngle();
 
@@ -347,25 +301,27 @@ public class BaseAutonomous extends LinearOpMode {
         double totalAngularDistance = toAngle-yAxisAngle;
         boolean turning = true;
         double prevAngle = robot.getYAxisAngle();
-        //boolean posAngle = yAxisAngle > 0;
 
         // Loop and update the dashboard
         while (opModeIsActive() && turning) {
             //what angle are we at right now?
-            //angles = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            //yAxisAngle = AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle);
-
             yAxisAngle = robot.getYAxisAngle();
 
-            // watch for the 180/-180 border
+            // watch for the 180/-180 border!
+            // Recall that forward is 0 degrees, with positive to the left,
+            // negative to the right
             if (yAxisAngle < 0 && prevAngle > 0) turning = false;
+
             prevAngle = yAxisAngle;
 
             // proportional power
             double percentAngularDistance = (toAngle-yAxisAngle)/totalAngularDistance;
             double proportionalPower = percentAngularDistance * power;
+            // make sure we never get down to a power of zero, or we
+            // might never finish our turn
             proportionalPower = Range.clip(proportionalPower, .05, power);
 
+            // have we spun far enough yet?
             if (yAxisAngle >= toAngle) turning = false;
 
             telemetry.addData("yAxis", yAxisAngle);
@@ -378,28 +334,18 @@ public class BaseAutonomous extends LinearOpMode {
                 robot.setPower(-proportionalPower, proportionalPower);
             }
         }
-
-        //Brake
-        //robot.setPower(power,-power);
-//        robot.setPower(.05, -0.5);
-//        sleep(10);
         robot.setPower(0);
-
-
     }
 
+    // This function is just like spinRight, but sets the power proportional to the distance
+    // from our target angle; this way we don't have to brake at the end.
+    // TBF: can we combine this with spinLeftP to make one function?
     public void spinRightP (double toAngle, double power) {
 
-        // makes it so whatever the user inputs the value returned will be negitive
-//        toAngle = Math.abs(toAngle);
-//        toAngle = toAngle*-1;
-
-        // this code turns left
+        // this code turns right
         double yAxisAngle;
         yAxisAngle = robot.getYAxisAngle();
         boolean turning = true;
-//        double turnAngle = 45.0;
-//        double power = 0.2;
         double totalAngularDistance = toAngle-yAxisAngle;
 
         double prevAngle = robot.getYAxisAngle();
@@ -407,20 +353,20 @@ public class BaseAutonomous extends LinearOpMode {
         // Loop and update the dashboard
         while (opModeIsActive() && turning) {
             // what angle are we at right now?
-            //angles = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            //yAxisAngle = AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle);
+           yAxisAngle = robot.getYAxisAngle();
 
-            yAxisAngle = robot.getYAxisAngle();
-
-            // watch for the border
+            // watch for the border at -180/180
             if (yAxisAngle > 0 && prevAngle < 0) turning = false;
+
             prevAngle = yAxisAngle;
 
             // proportional power
             double percentAngularDistance = (toAngle-yAxisAngle)/totalAngularDistance;
             double proportionalPower = percentAngularDistance * power;
+            // make sure we never go to a power of zero and never finish our turning
             proportionalPower = Range.clip(proportionalPower, .05, power);
 
+            // have we spun enough yet?
             if (yAxisAngle <= toAngle) turning = false;
 
             telemetry.addData("yAxis", yAxisAngle);
@@ -451,36 +397,33 @@ public class BaseAutonomous extends LinearOpMode {
     void moveFoundation(boolean blueSide)
     {
         double straightSpeed = .5;
-        double turnSpeed = .3;
+
         // in theory, we know how far we need to go,
         // but in practice we are off by 'offset'
         double offset = 2.0;
-        double dist = (4*12) - 18 - offset;
+        double robotWidth = 18.0;
+        double tileWidth = 24.0;
+        double dist = (2*tileWidth) - robotWidth - offset;
 
-        // move up to the foundation so that we are positioned
-        // to drop our claws on top of it
-
-
-        // the purpose of this next group of code is to start
-        // in a legal position, but then end in the middle of the foundation
-
+        // Place the robot with it's back to the wall, adjacent to the building site.
+        // Then, move up to the foundation so that we are positioned
+        // to drop our claws on top of it.
+        // The purpose of this next group of code is to start
+        // in a legal position, but then end in the middle of the foundation.
         driveStraight(straightSpeed,dist/3,20);
         robot.brake(1);
 
-//        spinLeftP(45,0.8);
+         // spinLeftP(45,0.8);
          spin(blueSide,45,0.8);
 
         driveStraight(straightSpeed,(dist/3)+5,20);
         robot.brake(1);
 
-//        spinRightP(0,0.8);
+        // spinRightP(0,0.8);
         spin(!blueSide,0,0.8);
 
         driveStraight(straightSpeed,dist/3 ,20);
         robot.brake(1);
-
-//        driveStraight(straightSpeed,dist ,20);
-
 
         // close claws so that they will drop down on top of the foundation
         robot.straightClaws();
@@ -489,7 +432,7 @@ public class BaseAutonomous extends LinearOpMode {
 
         // go backwards so that the grooves catch on the foundation edge,
         // and we can start dragging the foundation towards the building site.
-//        driveStraight(0.2,-(dist - 4),20 );
+        //  driveStraight(0.2,-(dist - 4),20 );
         // slow down a little bit to make sure we grab the foundation
         driveStraight(0.1,-4,20 );
         driveStraight(0.2,-(dist - 4 - 4),20 );
@@ -506,7 +449,6 @@ public class BaseAutonomous extends LinearOpMode {
 
         // now we need to get to the other side of the side of the foundation,
         // so we can push it further into the building zone
-
         spin(!blueSide, 90, .8);
 
         // stop dropping the slider
@@ -515,36 +457,34 @@ public class BaseAutonomous extends LinearOpMode {
         driveStraight(.5,28,10);
         robot.brake(1);
 
-        //make sure the linear slider is all the way down
-        // so that we don't drive OVER the foundation
-        //robot.closeClaws();
-        //sleep(1000);
-        //robot.openClaws();
-
         // spinLeftP(0,.8);
         spin(blueSide, 0, .8);
 
         driveStraight(.75, 44,20);
         robot.brake(1);
 
-//        spinLeftP(90, .8);
+        // spinLeftP(90, .8);
         spin(blueSide, 90, .8);
 
+        // Go far enough to get behind the foundation so
+        // that we can push it at the right spot.
         // 12 is too close to the middle of foundation?
         // 6 barely gets the side
         driveStraight(.75,9, 20);
         robot.brake(1);
 
-//        spinLeftP(180, .8);
+        // spinLeftP(180, .8);
         spin(blueSide, 180, .8);
 
         // push the foundation into the building zone
         // is too high a power causing it to skid?
-        // is it risky to use the gyrosensor, when we are at the 180/-180 angle boundary?
-//        driveStraight(.2,50, 20);
+        // It is too risky to use the gyrosensor, when we are at the 180/-180 angle boundary.
+        // TBF: reset the gyro sensor here, rather then simply not use it.
+        //  driveStraight(.2,50, 20);
         encoderDrive(.3, 50, 50, 10, false);
 
-        //park robot
+        // Push the foundation in a bit more, and park robot.
+        // The directions we do this in depend on which side we are on.
         double dir;
         if(blueSide){
             dir=-1.0;
@@ -553,67 +493,15 @@ public class BaseAutonomous extends LinearOpMode {
             dir=1.0;
         }
 
+        // push the foundation in a bit more
         robot.setStrafePower(.7 * dir);
         sleep(400);
 
+        // park under the sky bridge
         robot.setStrafePower(-.7*dir);
         sleep(1200);
         robot.setPower(0);
 
-
     }
 
-    void moveFoundationSimple(boolean blueSide) {
-        double straightSpeed = .5;
-        double turnSpeed = .3;
-        // in theory, we know how far we need to go,
-        // but in practice we are off by 'offset'
-        double offset = 2.0;
-        double dist = (4 * 12) - 18 - offset;
-
-        // move up to the foundation so that we are positioned
-        // to drop our claws on top of it
-
-        //robot.setStrafePower(-.3);
-        //sleep(500);
-        //robot.setPower(0);
-        // sleep(5000);
-        //robot.brake();
-        //driveStraight(straightSpeed,dist,20);
-        //robot.brake(1);
-
-        // the purpose of this next group of code is to start
-        // in a legal position, but then end in the middle of the foundation
-        driveStraight(straightSpeed, dist / 3, 20);
-        robot.brake(1);
-
-        spinLeftP(45, 0.5);
-
-        driveStraight(straightSpeed, (dist / 3) + 5, 20);
-        robot.brake(1);
-
-        spinRight(40, 0.5);
-
-        driveStraight(straightSpeed, dist / 3, 20);
-        robot.brake(1);
-
-        // close claws so that they will drop down on top of the foundation
-        robot.straightClaws();
-
-        sleep(500);
-
-        // go backwards so that the grooves catch on the foundation edge,
-        // and we can start dragging the foundation towards the building site.
-        driveStraight(0.1, -(dist - 1), 20);
-
-        // this part of the code unattaches the robot from the
-        // foundation by lifting linear slider, and opening claws,
-        // and letting go of slider
-        robot.setLinearMotorPower(1);
-        sleep(700);
-        robot.openClaws();
-
-        //drop linear slider
-        robot.setLinearMotorPower(0);
-    }
 }
