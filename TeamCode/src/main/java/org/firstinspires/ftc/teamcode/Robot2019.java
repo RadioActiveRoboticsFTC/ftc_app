@@ -64,7 +64,7 @@ public class Robot2019
     public DcMotor leftFrontDrive   = null;
     public DcMotor rightFrontDrive  = null;
 
-    //Linear slider motor
+    //Linear slider motors
     public DcMotor leftSliderMotor = null;
     public DcMotor rightSliderMotor = null;
 
@@ -72,9 +72,11 @@ public class Robot2019
     public Servo leftServo    = null;
     public Servo rightServo   = null;
 
+    // TBF: we are no longer using these
     public Servo rearRightServo = null;
     public Servo rearLeftServo = null;
 
+    // this is the servo for tipping over the capstone
     public Servo capServo = null;
 
     /*
@@ -92,7 +94,7 @@ public class Robot2019
     float openPositionR = (float) .75;
     float straitPositionR = (float) .67;
 
-    // these are for the gamepads, so shouldn't be in here
+    // these are for the gamepads, so shouldn't be in here?
     float triggerDownR = (float) 1.0;
     float gearTriggerDown = (float) 0.7;
     float strafeTriggerDown =  (float) 0.70;
@@ -103,15 +105,16 @@ public class Robot2019
     // State used for updating telemetry
     Orientation angles;
 
-    /* local OpMode members. */
-    HardwareMap hwMap           =  null;
+    // We'll use this for initializing all hardware
+    HardwareMap hwMap  =  null;
 
     /* Constructor */
     public Robot2019(){
 
     }
 
-    /* Initialize standard Hardware interfaces */
+    /* Initialize standard Hardware interfaces
+    *  We got this idea from some of the example code */
     public void init(HardwareMap ahwMap) {
         // Save reference to Hardware map
         hwMap = ahwMap;
@@ -125,21 +128,24 @@ public class Robot2019
         leftFrontDrive  = hwMap.get(DcMotor.class, "left_front_drive");
         rightFrontDrive = hwMap.get(DcMotor.class, "right_front_drive");
 
-        //Slider Motor
+        // Slider Motors
         leftSliderMotor = hwMap.get(DcMotor.class, "slider_motor");
         rightSliderMotor = hwMap.get(DcMotor.class, "slider_motor2");
         leftSliderMotor.setDirection(DcMotor.Direction.REVERSE);
         rightSliderMotor.setDirection(DcMotor.Direction.FORWARD);
 
-        leftDrive.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
-        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
-
-        rightDrive.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
-        rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
+        // The drive motors on each side are mirrors of one another.  So if
+        // we want them to run in the same direction given the same power, one
+        // side needs to be defined to go in the direction opposite of the other
+        leftDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightDrive.setDirection(DcMotor.Direction.FORWARD);
+        rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
 
         // Set all motors to zero power
         setPower(0);
 
+        // Use encoders by default
         setDriveMode(DcMotor.RunMode.RUN_USING_ENCODER);
         leftSliderMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightSliderMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -147,6 +153,7 @@ public class Robot2019
         // Set up the parameters with which we will use our IMU. Note that integration
         // algorithm here just reports accelerations to the logcat log; it doesn't actually
         // provide positional information.
+        // We got this code from the examples.
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
@@ -161,7 +168,7 @@ public class Robot2019
         imu = hwMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
 
-
+        /* Initialize the servos */
         leftServo = hwMap.get(Servo.class, "LeftServo");
         rightServo = hwMap.get(Servo.class, "RightServo");
 
@@ -172,13 +179,13 @@ public class Robot2019
 
     }
 
-    //This gets the servo in its starting position
+    // This gets the servo in its starting position
     public void raiseRearServos() {
         rearRightServo.setPosition(0);
         rearLeftServo.setPosition(0.9);
     }
 
-    //This gets the servo to its clamped position
+    // This gets the servo to its clamped position
     public void lowerRearServos() {
         rearRightServo.setPosition(0.7);
         rearLeftServo.setPosition(0.3);
@@ -216,10 +223,12 @@ public class Robot2019
         rightFrontDrive.setTargetPosition(newRightTarget);
     }
 
+    // strafe to the left.  we don't have to worry about the sign of the power
     public void setLeftStrafePower(double power) {
         setStrafePower(-Math.abs(power));
     }
 
+    // strafe to the right.  we don't have to worry about the sign of the power
     public void setRightStrafePower(double power) {
         setStrafePower(Math.abs(power));
     }
@@ -233,20 +242,6 @@ public class Robot2019
         rightFrontDrive.setPower(-power);
     }
 
-    // TBF: remove this?
-    public void runMotorTickDistance(int distance, double power, DcMotor motor) {
-        int newTarget = motor.getCurrentPosition();
-        motor.setTargetPosition(newTarget);
-        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motor.setPower(Math.abs(power));
-        while (motor.isBusy()) {
-            // let the motor run
-
-        }
-        motor.setPower(0);
-        motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    }
-
     // get the gyrosenor angle.  Straight ahead is zero.
     // to the left is positive until 180, then it turns into -180.
     // to the right is negative, until -180, then it turns into 180.S
@@ -257,46 +252,50 @@ public class Robot2019
         return AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle);
     }
 
-    //function to brake the robot, set the direction to 1 or -1,
-    //1 for braking after going forward, -1 for backward
+    // function to brake the robot, set the direction to 1 or -1,
+    // 1 for braking after going forward, -1 for backward
+    // TBF: create brakeForward and brakeBackwards functions that call this
     public void brake(double direction){
         setPower(-.2*direction);
         //sleep(10);
         setPower(0);
     }
 
+    // move servo so that capstone stays in robot
     public void raiseCap() {
         capServo.setPosition(raisedPositionCap);
     }
+
+    // move servo so that capstone gets dumped
     public void dropCap() {
         capServo.setPosition(dropPositionCap);
     }
 
+    // Move the servos so the claws can grab a brick
+    // TBF: why do these use the 'openPosition' variables?
     public void closeClaws(){
         leftServo.setPosition(openPositionL);
         rightServo.setPosition(openPositionR);
-
-
-
     }
 
+    // Move the servos so that the claws can grab the foundation
     public void straightClaws(){
         leftServo.setPosition(straightPositionL);
         rightServo.setPosition(straitPositionR);
     }
 
+    // Move the servos so that the claws are open
+    // as wide as possible
     public void openClaws(){
         rightServo.setPosition(closedPositionR);
         leftServo.setPosition(closedPositionL);
     }
 
+    // sets the power of both linear slider motors
     public void setLinearMotorPower(double power){
-     leftSliderMotor.setPower(power);
-     rightSliderMotor.setPower(power);
+        leftSliderMotor.setPower(power);
+        rightSliderMotor.setPower(power);
     }
-
-
-
 
 }
 
