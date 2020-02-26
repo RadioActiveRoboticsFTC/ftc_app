@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 // Directions:
 // Place robot against wall, facing the sky bridge, either side.  Have
-// the front of the robot almost under the sky bridge. See Diagram ???
+// the front of the robot almost under the sky bridge.
 
 // Points:
 // 5 points for parking the robot directly under the sky bridge
@@ -17,9 +17,10 @@ public class Autonomous1 extends BaseAutonomous {
 
     // The BaseAutonomous class will have it's runOpsMode function called.  It will set up
     // basic stuff for us, but then it calls it's own runAutoOpMode, which does nothing.
-    // We 'overrid' runAutoOpMode to do *something*
+    // We 'override' runAutoOpMode to do *something*
     @Override
     public void runAutoOpMode() {
+        // lower claws so that linear slider fits under sky bridga
         robot.closeClaws();
         sleep(2000);
         // driving straight this distance parks the robot directly under
