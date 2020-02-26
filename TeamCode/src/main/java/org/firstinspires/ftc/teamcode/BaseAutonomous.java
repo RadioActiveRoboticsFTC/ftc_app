@@ -489,7 +489,10 @@ public class BaseAutonomous extends LinearOpMode {
 
         // go backwards so that the grooves catch on the foundation edge,
         // and we can start dragging the foundation towards the building site.
-        driveStraight(0.2,-(dist - 4),20 );
+//        driveStraight(0.2,-(dist - 4),20 );
+        // slow down a little bit to make sure we grab the foundation
+        driveStraight(0.1,-4,20 );
+        driveStraight(0.2,-(dist - 4 - 4),20 );
 
         // this part of the code unattaches the robot from the
         // foundation by lifting linear slider, and opening claws,
@@ -499,12 +502,15 @@ public class BaseAutonomous extends LinearOpMode {
         robot.openClaws();
 
         //drop linear slider
-        robot.setLinearMotorPower(0);
+        robot.setLinearMotorPower(.2);
 
         // now we need to get to the other side of the side of the foundation,
         // so we can push it further into the building zone
 
         spin(!blueSide, 90, .8);
+
+        // stop dropping the slider
+        robot.setLinearMotorPower(0);
 
         driveStraight(.5,28,10);
         robot.brake(1);
