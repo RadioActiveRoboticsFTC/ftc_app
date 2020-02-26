@@ -40,20 +40,7 @@ import com.qualcomm.robotcore.util.Range;
 
 import java.util.List;
 
-//import com.qualcomm.robotcore.hardware.Servo;
 
-/**
- * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
- * the autonomous or the teleop period of an FTC match. The names of OpModes appear on the menu
- * of the FTC Driver Station. When an selection is made from the menu, the corresponding OpMode
- * class is instantiated on the Robot Controller and executed.
- *
- * This particular OpMode just executes a basic Tank Drive Teleop for a two wheeled robot
- * It includes all the skeletal structure that all linear OpModes contain.
- *
- * Use Android Studios to Copy this Class, and Paste it into your team's code folder with a new name.
- * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
- */
 
 @TeleOp(name="Working Remote Control", group="Linear Opmode")
 public class DriverControl extends LinearOpMode {
@@ -64,245 +51,182 @@ public class DriverControl extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+
+        // create our robot object so we have access to motors, etc.
         Robot2019              robot   = new Robot2019();
-        // Connect to servo (Assume PushBot Left Hand)
-        // Change the text in quotes to match any servo name on your robot.
 
+        // setup the robot motors via the configuration file
         robot.init(hardwareMap);
+
         telemetry.addData("Status", "Initialized");
-
-
         telemetry.update();
-
-
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
 
-        double rightposition = 0.0;
-        double leftposition = 0.0;
         //Get the initial value of our slider motor position
-        double sliderStart = robot.leftSliderMotor.getCurrentPosition();
-        double sliderStart2 = robot.rightSliderMotor.getCurrentPosition();
-        boolean previousSliderBad = false;
-        boolean previousSliderBad2 = false;
+        double leftSliderStart = robot.leftSliderMotor.getCurrentPosition();
+        double rightSliderStart = robot.rightSliderMotor.getCurrentPosition();
+
+        // initialize the bad slider position flags
+        boolean prevRightSliderBad = false;
+        boolean prevLeftSliderBad = false;
+
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
+            // moves the robot
+            robotMotion(robot);
 
-            // Setup a variable for each drive wheel to save power level for telemetry
-            double leftPower;
-            double rightPower;
+            // moves the claw and capstone servo
+            powerManipulators(robot);
 
-
-            boolean xPressed = gamepad1.x;
-            //boolean yPressed = gamepad1.y;
-
-            float gear = gamepad1.right_trigger;
-            // Choose to drive using either Tank Mode, or POV Mode
-            // Comment out the method that's not used.  The default below is POV.
-
-            // POV Mode uses left stick to go forward, left stick x-values to strafe, and right stick to turn.
-
-            // - This uses basic math to combine motions and is easier to drive straight.
-            double drive;
-            double turn;
-            double strafeDirection;
-            if(gear < robot.gearTriggerDown){
-                drive = -gamepad1.left_stick_y;
-                turn = gamepad1.right_stick_x;
-                //values for strafing
-                strafeDirection = gamepad1.left_stick_x;
-            }
-            else {
-                drive = -gamepad1.left_stick_y/3;
-                turn = gamepad1.right_stick_x/3;
-                //values for strafing
-                strafeDirection = gamepad1.left_stick_x/3;
-            }
-            leftPower    = Range.clip(drive + turn, -1, 1) ;
-            rightPower   = Range.clip(drive - turn, -1, 1) ;
-
-            // claw arms can be open and closed.
-
-            // TBF: what are the values for the trigger?
-            // for now, assume down == 1.0, and up is 0.0
-            float leftTriggerValue = gamepad2.left_trigger;
-
-            float strafeTrigger = gamepad1.left_trigger;
-            // Send calculated power to wheels
-            //if you are not strafing, drive normally
-            if (strafeTrigger > robot.strafeTriggerDown){
-                robot.setStrafePower(strafeDirection);
-            }
-            else{
-                robot.setPower(leftPower, rightPower);
-            }
-            /*
-            if (strafeDirection == 0.0) {
-
-                robot.setPower(leftPower, rightPower);
-
-            }
-            //otherwise strafe either left or right, at variable power
-            else if (strafeTrigger > robot.strafeTriggerDown) {
-                //power is equal to the x value of the joystick so you are taking the - of a - or vice versa
-                robot.setStrafePower(strafeDirection);
-
-            }
-            */
-            // code for linear slider
+            // code for linear slider; gather the values needed from the
+            // second gamepad
             double yAxis = gamepad2.left_stick_y;
             boolean aPressed =   gamepad2.a;
+            boolean rightBumper = gamepad2.right_bumper;
 
-            double sliderPos = robot.leftSliderMotor.getCurrentPosition();
-            double sliderPos2 = robot.rightSliderMotor.getCurrentPosition();
-            telemetry.addData("Slider Pos", sliderPos);
-            telemetry.addData("Slider 1 dist", sliderPos - sliderStart);
-            telemetry.addData("Slider 2 dist", sliderPos2 - sliderStart2);
-            // This is false if the linear slider is within the proper range
-            boolean isSliderBad = sliderPos > sliderStart+40;
-            if(isSliderBad == false && previousSliderBad == true){
-                robot.leftSliderMotor.setPower(0);
-            }
-            previousSliderBad = isSliderBad;
-            if(isSliderBad){
-                robot.leftSliderMotor.setPower(-0.7);
-            }
-            else {
-                // Here, we translate the driver's intention
-                // into motor powers
+            // for each linear slider motor, move it in the desired direction
+            // but also make sure we don't unwind the string
+            prevLeftSliderBad = powerSliderMotor(robot.leftSliderMotor,
+                    leftSliderStart,
+                    prevLeftSliderBad,
+                    yAxis,
+                    aPressed,
+                    rightBumper);
 
-                //transition moving up state
-                if (yAxis < 0) {
-                    // check to see if we're gearing down
-                    if(gamepad2.right_bumper == true){
-                      robot.leftSliderMotor.setPower(yAxis/2);
-                    }
-                    else {
-                        robot.leftSliderMotor.setPower(yAxis);
-                    }
-                }
-                //transition to stall state, change power value TBF
-                if (aPressed) {
-                    robot.leftSliderMotor.setPower(-0.5);
-                }
+            prevRightSliderBad = powerSliderMotor(robot.rightSliderMotor,
+                    rightSliderStart,
+                    prevRightSliderBad,
+                    yAxis,
+                    aPressed,
+                    rightBumper);
 
-                if (yAxis >= 0 && !aPressed) {
-                    robot.leftSliderMotor.setPower(yAxis / 2);
-                }
-            }
-
-            boolean isSliderBad2 = sliderPos2 > sliderStart2+40;
-            if(isSliderBad2 == false && previousSliderBad2 == true){
-                robot.rightSliderMotor.setPower(0);
-            }
-            previousSliderBad2 = isSliderBad2;
-            if(isSliderBad2){
-                robot.rightSliderMotor.setPower(-0.7);
-            }
-            else {
-                //transition moving up state
-                if (yAxis < 0) {
-
-                    if(gamepad2.right_bumper == true){
-                        robot.rightSliderMotor.setPower(yAxis/2);
-                    }
-                    else {
-                        robot.rightSliderMotor.setPower(yAxis);
-                    }
-                }
-                //transition to stall state, change power value TBF
-                if (aPressed) {
-                    robot.rightSliderMotor.setPower(-0.5);
-                }
-
-                if (yAxis >= 0 && !aPressed) {
-                    robot.rightSliderMotor.setPower(yAxis / 2 );
-                }
-            }
-
-
-            //robot.leftSliderMotor.setPower(-gamepad2.left_stick_y);
-            //robot.rightSliderMotor.setPower(gamepad2.left_stick_y);
-            telemetry.addData("left trigger value", leftTriggerValue);
-
-
-            //open and close the claws of the servo independetly
-            if (leftTriggerValue < robot.triggerDownL) {
-                leftposition = robot.closedPositionL;
-            }
-            if (leftTriggerValue == robot.triggerDownL) {
-                leftposition = robot.openPositionL;
-            }
-
-
-            // if right trigger pressed right servo goes to closed position
-
-            float rightTriggerValue = gamepad2.right_trigger;
-            if (rightTriggerValue < robot.triggerDownR){
-                rightposition = robot.closedPositionR;}
-
-            if (rightTriggerValue == robot.triggerDownR){
-                rightposition = robot.openPositionR;
-            }
-            if (gamepad2.y == true){
-                leftposition = robot.straightPositionL;
-            }
-            if (gamepad2.y == true){
-                rightposition = robot.straitPositionR;
-            }
-            // Display the current value
-            telemetry.addData(" Left Servo Position", "%5.2f", leftposition);
-            telemetry.addData(">", "Press Stop to end test." );
-            if (gamepad2.x) {
-                robot.dropCap();
-            }else{
-                robot.raiseCap();
-            }
-
-//            if (gamepad2.b) {
-//                robot.lowerRearServos();
-//
-//            } else {
-//                robot.raiseRearServos();
-//
-//            }
-            robot.leftServo.setPosition(leftposition);
-            robot.rightServo.setPosition(rightposition);
-
-
-
-            //sleep(CYCLE_MS);
             idle();
-
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("Left/Right Joysticks", "left (%.2f), right (%.2f)", drive, turn);
-            telemetry.addData("left joystick x", strafeDirection);
-            telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
-            telemetry.addData("X Pressed?", "%s", xPressed);
-            telemetry.addData("RF pos", robot.rightFrontDrive.getCurrentPosition());
             telemetry.update();
         }
     }
 
-    public void powerSliderMotor(Robot2019 robot,
-                                 double sliderStart,
-                                 double sliderPos,
-                                 boolean previousSliderBad,
-                                 double yAxis,
-                                 boolean aPressed) {
+    // function for moving the robot
+    public void robotMotion(Robot2019 robot){
+
+        //grab needed values from gamepad1
+        float gear = gamepad1.right_trigger;
+        float strafeTrigger = gamepad1.left_trigger;
+        double leftStickY = gamepad1.left_stick_y;
+        double leftStickX = gamepad1.left_stick_x;
+        double rightStickX = gamepad1.right_stick_x;
+
+        //create scaling factor for the speed of the robot
+        double scale = 1;
+        if(gear >= robot.gearTriggerDown) scale = 3.0;
+
+        //variable for the power to each side of the robot
+        double leftPower;
+        double rightPower;
+
+        //variables for turning and strafing
+        double drive;
+        double turn;
+        double strafePower;
+
+        //now we turn the values from the controller into the
+        // robot power through our scale factor
+        drive = -leftStickY/scale;
+        turn = rightStickX/scale;
+        strafePower = leftStickX/scale;
+
+        //This is basic math to decide how the different sides
+        // of the robot get power for basic driving
+        leftPower    = Range.clip(drive + turn, -1, 1) ;
+        rightPower   = Range.clip(drive - turn, -1, 1) ;
+
+        //This decides whether the robot will strafe or
+        // drive normally, based of the right trigger (strafeTrigger)
+        if(strafeTrigger >= robot.strafeTriggerDown){
+            robot.setStrafePower(strafePower);
+        }else{
+            robot.setPower(leftPower, rightPower);
+        }
+
+    }
+
+    // function for controling the claw and capstone servo
+    public void powerManipulators(Robot2019 robot){
+        //inputs from the gamepad controller
+        float leftTriggerValue = gamepad2.left_trigger;
+        float rightTriggerValue = gamepad2.right_trigger;
+        boolean yButton = gamepad2.y;
+        boolean xButton = gamepad2.x;
+        //positions of the servos
+        double rightposition = 0;
+        double leftposition = 0;
+        //open and close the claws of the servo independetly
+        //left claw
+        if (leftTriggerValue < robot.triggerDownL) {
+            leftposition = robot.closedPositionL;
+        }
+        if (leftTriggerValue >= robot.triggerDownL) {
+            leftposition = robot.openPositionL;
+        }
+
+        // if right trigger pressed right servo goes to closed position
+        if (rightTriggerValue < robot.triggerDownR){
+            rightposition = robot.closedPositionR;}
+
+        if (rightTriggerValue >= robot.triggerDownR){
+            rightposition = robot.openPositionR;
+        }
+        //If the y button is pressed the servos go
+        // to the position to drag the foundation
+        if (yButton == true){
+            leftposition = robot.straightPositionL;
+            rightposition = robot.straitPositionR;
+        }
+        //If the x button is pressed drop the capstone
+        if (xButton) {
+            robot.dropCap();
+        }else{
+            robot.raiseCap();
+        }
+
+        robot.leftServo.setPosition(leftposition);
+        robot.rightServo.setPosition(rightposition);
+
+    }
+
+    // function for powering a single slider motor
+    public boolean powerSliderMotor(DcMotor sliderMotor,
+                                    double sliderStart,
+                                    boolean previousSliderBad,
+                                    double yAxis,
+                                    boolean aPressed,
+                                    boolean rightBumper) {
+
+        // set the scaling factor for moving slider up
+        double scale = 1.0;
+        if (rightBumper) scale = 2.0;
+
+        double sliderPos= sliderMotor.getCurrentPosition();
+
+        // telemetry.addData("Slider dist", sliderPos - sliderStart);
+
         // This is false if the linear slider is within the proper range
         boolean isSliderBad = sliderPos > sliderStart+40;
         if(isSliderBad == false && previousSliderBad == true){
-            robot.leftSliderMotor.setPower(0);
+            sliderMotor.setPower(0);
         }
+        // save this for the next time around
         previousSliderBad = isSliderBad;
+
         if(isSliderBad){
-            robot.leftSliderMotor.setPower(-0.7);
+            // slider is in a bad position; move it out of it
+            sliderMotor.setPower(-0.7);
         }
         else {
             // Here, we translate the driver's intention
@@ -310,23 +234,17 @@ public class DriverControl extends LinearOpMode {
 
             //transition moving up state
             if (yAxis < 0) {
-                // check to see if we're gearing down
-                if(gamepad2.right_bumper == true){
-                    robot.leftSliderMotor.setPower(yAxis/2);
-                }
-                else {
-                    robot.leftSliderMotor.setPower(yAxis);
-                }
+                sliderMotor.setPower(yAxis/scale);
             }
             //transition to stall state, change power value TBF
             if (aPressed) {
-                robot.leftSliderMotor.setPower(-0.5);
+               sliderMotor.setPower(-0.25);
             }
 
             if (yAxis >= 0 && !aPressed) {
-                robot.leftSliderMotor.setPower(yAxis / 2);
+              sliderMotor.setPower(yAxis / 2);
             }
         }
-
+        return previousSliderBad;
     }
 }
